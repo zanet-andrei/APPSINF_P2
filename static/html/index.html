@@ -1,0 +1,41 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Projet 2 </title>
+		<!--<link rel="stylesheet" type="text/css" href="../css/miseenpage.css"/>-->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/js/all.min.js"></script>
+    </head>
+
+
+    <body>
+        <div id="miseEnFormePage">
+
+			<nav>
+				<div id="sec">
+					<a href="index.html"><img alt="logoSite" id="logoSite" src="../resources/logo_projet_fin.png"></a>
+					<!--<p id="accountname">{{account}}</p>-->
+					<form action="/html/search" method="post">
+						<input type="text" id="searchbar" name="search" placeholder="Rechercher.. "/>
+					</form>
+					<!--<div id="boutonsRedirection">
+						<a href="creation_compte.html" id="connexionNav">{{connexion}}</a>
+						<a href="ajout_incidents.html" id="ajoutNav">Signaler un nouvel incident</a>
+						<a href="accueil.html" id="voirNav">Voir les incidents</a>
+					</div>
+					<div id="date">
+						<p><p>Date actuelle: {{currentDate}}</p></p>
+					</div>-->
+				</div>
+			</nav>
+
+
+			<div id="divRestaurants">
+
+				<table id="tableRestaurants">
+					{{{table}}}
+				</table>
+
+			</div>
+        </div>
+    </body>
+</html>
