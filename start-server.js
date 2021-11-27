@@ -28,6 +28,10 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
     db_restaurants = db.db("restaurants")
 
+    db_account = db.db("accounts"); //Alex
+    //db("accounts") sous la forme {"username" : pseudo, "password" : mdp, "email" : adresse email}
+
+
     app.get("/", function(req, res, next) {
         res.redirect("html/index.html");
     });
@@ -94,6 +98,59 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             res.render("html/index.html", {table:tableToReturn});
         });
     });
+
+    //création de compte (Alex)
+
+    app.post("/html/create", function(req,res,next) {
+        psw = req.body.password_new;
+        if(req.body.username_new == "" || req.body.email_new == "" || req.body.password_new == "" || req.body.confirm_password == ""){
+            res.render("html/test_page_crea_compte.html",{error: "Veuillez remplir toutes les cases !"});
+        } else{
+            db_account.collection("accounts").findOne({"username" : req.body.username_new}, (err,doc) => {
+                if (err) throw err;
+                if (doc != null){
+                    res.render("html/test_page_crea_compte.html", {error:"Ce nom d'utilisateur est déjà pris"});
+                }else if (req.body.password_new.length < 8){
+                    res.render("html/test_page_crea_compte.html", {error: "Le mot de passe doit contenir minimum 8 caractères"})
+                }else if (req.body.password_new != req.body.confirm_password){
+                    res.render("html/test_page_crea_compte.html", {error:"Les deux mots de passes ne correspondent pas"});
+                }else {
+                    db_account.collection("accounts").findOne({"email" : req.body.email_new}, (err,doc) => {
+                        if (err) throw err;
+                        if (doc != null){
+                            res.render("html/test_page_crea_compte.html", {error:"Cette adresse e-mail est déjà prise"});
+                        } else {
+                            db_account.collection("accounts").insertOne({"username" :req.body.username_new ,"password" : psw , "email" : req.body.email_new });
+                            req.session.username = req.body.username_new;
+                            res.redirect("page_Andrei.html")      // A REMPLACER !!!!!!!!!!!!!
+                        }
+                    })                    
+                }
+
+            }
+            )
+        }
+    });
+
+    // Connexion à un compte (Alex)
+
+    app.post("/html/connect",function(req,res,next){
+        if (req.body.username == "" || req.body.password == ""){
+            res.render("html/test_page_co.html", {error: "Veuillez remplir toutes les cases!"});
+        } else {
+            db_account.collection("accounts").findOne({"username" : req.body.username}, (err,doc) => {
+                if (err) throw err;
+                if (doc == null) {
+                    res.render("html/test_page_co.html", {error : "Compte inexistant, veuillez vérifier vos données"});
+                } else {
+                    req.session.username = req.body.username
+                    res.redirect("page_Andrei.html")  //A REMPLACER !!!!!!!!!!!!!!!!!
+                }
+            }
+            )
+        }
+    }
+    );
 
     app.get("/html/index.html", function(req, res, next) {
         db_restaurants.collection("restaurants").find({}).sort({_id:-1}).toArray(function(err, result) {
