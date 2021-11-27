@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>test page de co</title>
+        <link rel="stylesheet" href="../css/test_page_co-crea.css">
+    </head>
+    <body>
+        <form method="post" action="/html/connect">
+            <h1>Se connecter</h1>
+            <div class="inputs">
+                <input type="text" name="username" placeholder="Nom d'utilisateur">
+                <input type="password" name="password" placeholder="Mot de passe">
+            </div>
+
+            <p id="error_message">{{error}}</p>
+            
+            <p class="création_compte"> Je n'ai pas de compte. Je m'en <a href="test_page_crea_compte.html">crée</a> un. </p>
+
+            <div align="center">
+                <button type="submit"> Se connecter</button>
+            </div>
+        </form>
+    </body>
+</html>
