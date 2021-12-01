@@ -6,6 +6,7 @@ let express = require('express'),
     https = require("https"),
     fs = require("fs"),
     session = require("express-session");
+const { truncate } = require('fs/promises');
     levenshtein = require('js-levenshtein');
 
 var app = express();
@@ -19,6 +20,40 @@ app.use(session({
         httpOnly: true
     }
 }));
+
+function verif_mdp(mot_de_passe){	//mot_de_passe = "zkindd6dzd_S"
+	const mdp = mot_de_passe.split("");
+    console.log(mdp)
+    const majuscules = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+	const minuscule = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+	const special = ['.',"*","[","]","(",")","$","{","}","=","!","<",">","|",":","-","_"];
+	const numbers = ["0","1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    let bool_maj = false;
+    let bool_min = false;
+    let bool_num = false;
+    let bool_spe = false;
+	for (let index = 0; index < mdp.length; index++) {
+		if (majuscules.includes(mdp[index])){
+			bool_maj = true;
+        	console.log("Le mdp contient une majuscule" +" "+ mdp[index]);
+		} else if ((minuscule.includes(mdp[index]))) {
+			bool_min = true;
+            console.log("Le mdp contient une minuscule" +" "+ mdp[index]);
+		} else if ((special.includes(mdp[index]))){
+			bool_spe = true;
+            console.log("Le mdp contient des carac spéciaux" +" "+ mdp[index]);
+		} else if (numbers.includes(mdp[index])){
+			bool_num = true;
+            console.log("Le mdp contient des chiffres" +" "+ mdp[index]);
+		}
+	}	
+    
+    if(bool_maj == true && bool_min == true && bool_num == true && bool_spe == true){
+        return true;
+    } else {
+    return [bool_maj, bool_min, bool_spe, bool_num];
+    }
+}
 
 app.engine("html", consolidate.hogan);
 app.set("views", "static");
@@ -112,6 +147,39 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                     res.render("html/test_page_crea_compte.html", {error:"Ce nom d'utilisateur est déjà pris"});
                 }else if (req.body.password_new.length < 8){
                     res.render("html/test_page_crea_compte.html", {error: "Le mot de passe doit contenir minimum 8 caractères"})
+                }else if (verif_mdp(psw) != true){
+                    let result = verif_mdp(psw);
+                    error = []
+                    if (result[0] == false) {
+                        error.push("une majuscule");
+                    } if (result[1] == false) {
+                        error.push("une minuscule");
+                    }  if (result[2] == false) {
+                        error.push("un caractère spécial");
+                    }  if (result[3] == false) {
+                        error.push("un chiffre");
+                    }
+
+                    errorMessage = "Votre mot de passe doit contenir au moins "
+                    console.log(error.length);
+
+                    for (let i = 0; i < error.length; i++) {
+                        console.log(i);    
+                        if (error.length >= 1) {
+                            if ((error.length-1) == i) {
+                                errorMessage += error[i];
+                            } else if ((error.length-2) == i) {
+                                errorMessage += error[i] + " et ";
+                            } else {
+                                errorMessage += error[i] + ", ";
+                            }
+                        } else {
+                            errorMessage += error[i];
+                        }
+                    }
+                    console.log(error);
+                    console.log(result);
+                    res.render("html/test_page_crea_compte.html", {error: errorMessage});
                 }else if (req.body.password_new != req.body.confirm_password){
                     res.render("html/test_page_crea_compte.html", {error:"Les deux mots de passes ne correspondent pas"});
                 }else {
