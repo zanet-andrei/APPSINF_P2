@@ -21,7 +21,7 @@ app.use(session({
     }
 }));
 
-function verif_mdp(mot_de_passe){	//mot_de_passe = "zkindd6dzd_S"
+function verif_mdp(mot_de_passe){
 	const mdp = mot_de_passe.split("");
     console.log(mdp)
     const majuscules = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
@@ -69,6 +69,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
     app.get("/", function(req, res, next) {
         res.redirect("html/index.html");
+    });
+
+    app.get("/html/test_page_co.html", function(req, res, next) {
+        res.render("html/test_page_co.html", {error : ""});
+    });
+
+    app.get("/html/test_page_crea_compte.html", function(req, res, next) {
+        res.render("html/test_page_crea_compte.html",{error : ""});
     });
 
     // Barre de recherche (selon la description)
@@ -161,7 +169,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                     }
 
                     errorMessage = "Votre mot de passe doit contenir au moins "
-                    console.log(error.length);
+                    //console.log(error.length);
 
                     for (let i = 0; i < error.length; i++) {
                         console.log(i);    
@@ -177,8 +185,8 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                             errorMessage += error[i];
                         }
                     }
-                    console.log(error);
-                    console.log(result);
+                    //console.log(error);
+                    //console.log(result);
                     res.render("html/test_page_crea_compte.html", {error: errorMessage});
                 }else if (req.body.password_new != req.body.confirm_password){
                     res.render("html/test_page_crea_compte.html", {error:"Les deux mots de passes ne correspondent pas"});
@@ -190,7 +198,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                         } else {
                             db_account.collection("accounts").insertOne({"username" :req.body.username_new ,"password" : psw , "email" : req.body.email_new });
                             req.session.username = req.body.username_new;
-                            res.redirect("page_Andrei.html")      // A REMPLACER !!!!!!!!!!!!!
+                            res.redirect("index.html")
                         }
                     })                    
                 }
@@ -206,13 +214,13 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         if (req.body.username == "" || req.body.password == ""){
             res.render("html/test_page_co.html", {error: "Veuillez remplir toutes les cases!"});
         } else {
-            db_account.collection("accounts").findOne({"username" : req.body.username}, (err,doc) => {
+            db_account.collection("accounts").findOne({"username" : req.body.username,"password" : req.body.password}, (err,doc) => {
                 if (err) throw err;
                 if (doc == null) {
-                    res.render("html/test_page_co.html", {error : "Compte inexistant, veuillez vérifier vos données"});
+                    res.render("html/test_page_co.html", {error : "Nom d'utilisateur ou mot de passe incorect"});
                 } else {
                     req.session.username = req.body.username
-                    res.redirect("page_Andrei.html")  //A REMPLACER !!!!!!!!!!!!!!!!!
+                    res.redirect("index.html")
                 }
             }
             )
