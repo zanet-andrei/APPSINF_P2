@@ -7,7 +7,10 @@ let express = require('express'),
     fs = require("fs"),
     session = require("express-session");
 const { truncate } = require('fs/promises');
+const { addAbortSignal } = require('stream');
     levenshtein = require('js-levenshtein');
+    //bcrytp = require("bcryptjs");
+    crypto = require("crypto-js");
 
 var app = express();
 
@@ -23,7 +26,7 @@ app.use(session({
 
 function verif_mdp(mot_de_passe){
 	const mdp = mot_de_passe.split("");
-    console.log(mdp)
+    //console.log(mdp)
     const majuscules = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 	const minuscule = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 	const special = ['.',"*","[","]","(",")","$","{","}","=","!","<",">","|",":","-","_"];
@@ -35,16 +38,16 @@ function verif_mdp(mot_de_passe){
 	for (let index = 0; index < mdp.length; index++) {
 		if (majuscules.includes(mdp[index])){
 			bool_maj = true;
-        	console.log("Le mdp contient une majuscule" +" "+ mdp[index]);
+        	//console.log("Le mdp contient une majuscule" +" "+ mdp[index]);
 		} else if ((minuscule.includes(mdp[index]))) {
 			bool_min = true;
-            console.log("Le mdp contient une minuscule" +" "+ mdp[index]);
+            //console.log("Le mdp contient une minuscule" +" "+ mdp[index]);
 		} else if ((special.includes(mdp[index]))){
 			bool_spe = true;
-            console.log("Le mdp contient des carac spéciaux" +" "+ mdp[index]);
+            //console.log("Le mdp contient des carac spéciaux" +" "+ mdp[index]);
 		} else if (numbers.includes(mdp[index])){
 			bool_num = true;
-            console.log("Le mdp contient des chiffres" +" "+ mdp[index]);
+            //console.log("Le mdp contient des chiffres" +" "+ mdp[index]);
 		}
 	}	
     
@@ -172,7 +175,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                     //console.log(error.length);
 
                     for (let i = 0; i < error.length; i++) {
-                        console.log(i);    
+                        //console.log(i);    
                         if (error.length >= 1) {
                             if ((error.length-1) == i) {
                                 errorMessage += error[i];
@@ -196,9 +199,17 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                         if (doc != null){
                             res.render("html/test_page_crea_compte.html", {error:"Cette adresse e-mail est déjà prise"});
                         } else {
-                            db_account.collection("accounts").insertOne({"username" :req.body.username_new ,"password" : psw , "email" : req.body.email_new });
+                            //hachage du mdp
+                            console.log(req.body.password_new);
+                            var hash = crypto.MD5(req.body.password_new);
+                            hashed_pwd = hash.toString();
+                            console.log(hash.toString());
+                        
+                            // fin du hachage
+                            
+                            db_account.collection("accounts").insertOne({"username" :req.body.username_new ,"password" : hashed_pwd , "email" : req.body.email_new });
                             req.session.username = req.body.username_new;
-                            res.redirect("index.html")
+                            res.redirect("index.html");
                         }
                     })                    
                 }
@@ -213,14 +224,17 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     app.post("/html/connect",function(req,res,next){
         if (req.body.username == "" || req.body.password == ""){
             res.render("html/test_page_co.html", {error: "Veuillez remplir toutes les cases!"});
-        } else {
-            db_account.collection("accounts").findOne({"username" : req.body.username,"password" : req.body.password}, (err,doc) => {
+        } else {      
+            var hashed = crypto.MD5(req.body.password);
+            var hash_pwd = hashed.toString();
+            
+            db_account.collection("accounts").findOne({"username" : req.body.username,"password" : hash_pwd}, (err,doc) => {
                 if (err) throw err;
                 if (doc == null) {
                     res.render("html/test_page_co.html", {error : "Nom d'utilisateur ou mot de passe incorect"});
                 } else {
-                    req.session.username = req.body.username
-                    res.redirect("index.html")
+                    req.session.username = req.body.username;
+                    res.redirect("index.html");
                 }
             }
             )
@@ -243,7 +257,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                     tableToReturn += "</tr>";
                 }
             } else {
-                tableToReturn = "<p>Aucun élément ne correspond à votre recherche.</p>"
+                tableToReturn = "<p>Aucun élément ne correspond à votre recherche.</p>";
             }
 
             res.render("html/index.html", {table:tableToReturn});
