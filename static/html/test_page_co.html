@@ -6,20 +6,36 @@
         <link rel="stylesheet" href="../css/test_page_co-crea.css">
     </head>
     <body>
-        <form method="post" action="/html/connect">
-            <h1>Se connecter</h1>
-            <div class="inputs">
-                <input type="text" name="username" placeholder="Nom d'utilisateur">
-                <input type="password" name="password" placeholder="Mot de passe">
-            </div>
+        <header>
+            <img class="logo" src="download.png">
+            <nav>
+                <ul class="nav_links">
+                    <li><a id="Links" href="#">Services</a></li>
+                    <li><a id="Links" href="#">Projects</a></li>
+                    <li><a id="Links" href="#">About</a></li>
+                    <li><a id="Links" href="#">chorizeo</a></li>
+                    <li><a id="Links" href="#">salope</a></li>
+                    <li><a id="Links" href="#">Maxime_la_catin</a></li>
+                </ul>
+            </nav>
+            <a id="Links" href="Contact_admin.html"><button id="boutton_nav">Nous contactez</button></a>
+        </header>
+        <div id="Contenu_page">
+            <form method="post" action="/html/connect">
+                <h1>Se connecter</h1>
+                <div class="inputs">
+                    <input type="text" name="username" placeholder="Nom d'utilisateur">
+                    <input type="password" name="password" placeholder="Mot de passe" required>
+                </div>
 
-            <p id="error_message">{{error}}</p>
-            
-            <p class="création_compte"> Je n'ai pas de compte. Je m'en <a href="test_page_crea_compte.html">crée</a> un. </p>
+                <p id="error_message">{{error}}</p>
+                
+                <p class="création_compte"> Je n'ai pas de compte. Je m'en <a id="crea_lien" href="test_page_crea_compte.html">crée</a> un. </p>
 
-            <div align="center">
-                <button type="submit"> Se connecter</button>
-            </div>
-        </form>
+                <div align="center">
+                    <button type="submit"> Se connecter</button>
+                </div>
+            </form>
+        </div>  
     </body>
 </html>

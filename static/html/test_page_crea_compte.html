@@ -6,20 +6,36 @@
         <link rel="stylesheet" href="../css/test_page_co-crea.css">
     </head>
     <body>
-        <form method="post" action="/html/create">
-            <h1>Nouveau compte</h1>
-            <div class="inputs">
-                <input type="text" name="username_new" placeholder="Nom d'utilisateur">
-                <input type="email" name="email_new" placeholder="Adresse e-mail">
-                <input type="password" name="password_new" placeholder="Mot de passe" required>
-                <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
-            </div>
+        <header>
+            <img class="logo" src="download.png">
+            <nav>
+                <ul class="nav_links">
+                    <li><a id="Links" href="#">Services</a></li>
+                    <li><a id="Links" href="#">Projects</a></li>
+                    <li><a id="Links" href="#">About</a></li>
+                    <li><a id="Links" href="#">chorizeo</a></li>
+                    <li><a id="Links" href="#">salope</a></li>
+                    <li><a id="Links" href="#">Maxime_la_catin</a></li>
+                </ul>
+            </nav>
+            <a id="Links" href="Contact_admin.html"><button id="boutton_nav">Nous contactez</button></a>
+        </header>
+        <div id="Contenu_page">
+            <form method="post" action="/html/create">
+                <h1>Nouveau compte</h1>
+                <div class="inputs">
+                    <input type="text" name="username_new" placeholder="Nom d'utilisateur">
+                    <input type="email" name="email_new" placeholder="Adresse mail : example@uclouvain.be" pattern=".+uclouvain.be" title="Merci de saisir seulement une adresse uclouvain">
+                    <input type="password" name="password_new" placeholder="Mot de passe" required>
+                    <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+                </div>
 
-            <p id="error_message">{{error}}</p>
+                <p id="error_message">{{error}}</p>
 
-            <div align="center">
-                <button type="submit"> Créer un compte </button>
-            </div>
-        </form>
+                <div align="center">
+                    <button type="submit"> Créer un compte </button>
+                </div>
+            </form>
+        </div>  
     </body>
 </html>
