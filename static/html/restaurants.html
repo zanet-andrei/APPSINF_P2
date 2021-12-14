@@ -1,0 +1,77 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Page d accueil </title>
+        <link rel="stylesheet" type= "text/css" href= "../css/resto.css">
+    </head>
+    <script>
+    function monprog(element) {
+        var a = document.getElementById("prog");
+        if (element == 1 )
+            a.src = "../A.png"
+        else if (element == 2)
+            a.src = a.src = "../B.png"
+        else if (element == 3)
+            a.src = "../C.png"
+        else
+            a.src = "../D.png"   
+        }
+    </script>
+
+
+    <body>
+
+        <section class="tete">
+
+            <img class="img" src="../R.png"> 
+            <ul class="list_tete">
+                <li><a href="#">Accueil</a></li>
+                <li><a href="#">Se nourrir</a></li>
+                <li><a href="#">Info et actus !</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+
+        </section>
+
+        <section class="corps">
+
+            <div class="grand">
+                <h1>restaurants : {{name}}  </h1>
+                <img id="prog" src="../A.png"> 
+                
+                <div class="desc">
+                    <p>Voici une description du restaurant {{description}}</p>
+                    <ul class="list_resto">
+                        <li><a href="#"><i class="fas fa-map-marked"></i></a></li>
+                        <li><a href="#">Se nourrir</a></li>
+                        <li><a href="#">Info et actus !</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+
+
+            </div>
+
+            <div>
+                <ul class="list_rond">
+                    <li><a onclick=monprog(1)>&#x2B58;</a></li>
+                    <li><a onclick=monprog(2)>&#x2B58;</a></li>
+                    <li><a onclick=monprog(3)>&#x2B58;</a></li>
+                    <li><a onclick=monprog(4)>&#x2B58;</a></li>
+                </ul> 
+            </div>
+
+        </section>
+
+        <section class="sec_com">
+            <div class="commentaires">
+                <form action="/html/restaurants.html" method="post"  >
+                    <p> Commentaire </p>
+                    <textarea name="com" rows="2" cols="50" id="com"></textarea>
+                    <input class="boutons" id="PosterCom" type="submit" value="Poster">
+                </form>
+                <p>{{{test}}}</p>
+            </div>
+        </section>
+        
+    </body>
