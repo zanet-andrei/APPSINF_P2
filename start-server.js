@@ -145,6 +145,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         });
     });
 
+
     //création de compte (Alex)
 
     app.post("/html/create", function(req,res,next) {
@@ -263,6 +264,60 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             res.render("html/index.html", {table:tableToReturn});
         });
     });
+
+
+    //page resto et commentaire 
+    db_com = db.db("commentaire");
+
+	// Redirection des pages et affichage du nom d'utilisateur
+
+
+	app.get("/html/restaurants.html", function(req, res, next) {
+
+		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+			if (err) throw err;
+			if (result[0] != null) {
+				allcom = ""
+				for (let i = 0; i < result.length; i++) {
+					allcom += "<p>" + result[i]["com"] + '<a href=/html/supp?number='+result[i]["com"] +'> supp </a></p>'
+				}
+			} else{
+				allcom = "<p>Esapce commentaire vide.</p>"
+			}
+			res.render("html/restaurants.html", {test: allcom , description:"Voici une description fixe (qui ne vient pas de la bd)"})
+			
+		});
+
+
+	});
+    
+	
+    app.post("/html/restaurants.html", function(req, res, next) {
+        if (req.body.com == "" || req.body.com.length < 1 )
+        res.redirect("/html/restaurants.html")
+        db_com.collection("commentaire").insertOne({"com": req.body.com});
+		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+			if (err) throw err;
+			res.redirect("/html/restaurants.html")
+		});
+
+
+	});
+
+    app.get("/html/supp", function(req, res, next){
+        db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+			if (err) throw err;
+            if (result.length == 1 )
+                db_com.collection("commentaire").remove({"com" : result[0]["com"]})
+            else
+                db_com.collection("commentaire").remove({"com" : req.query.number})
+			    res.redirect("/html/restaurants.html")
+		});
+    })
+
+
+
+
 
     app.use(express.static("static"));
     https.createServer({

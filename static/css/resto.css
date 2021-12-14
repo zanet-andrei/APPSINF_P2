@@ -1,0 +1,128 @@
+body{
+    background-color:whitesmoke;
+    padding: 0;
+    margin: 0;
+    font-family: Georgia, serif;
+}
+
+/* ENTETE */
+.tete{
+    display: flex;                          /* Grand bloc blanc au top */          
+    background-color:brown;
+    padding: 1%;
+    padding-left: 10%;
+    
+}
+
+.img{
+    max-width: 7%;                          /* Image logo */
+    max-height: 7%;
+}
+
+.list_tete{
+    display: flex;
+    margin-left: 10%;
+    min-width: 65%;
+    justify-content: space-between;
+    
+}
+
+.list_tete li{
+    font-size: 120%;
+    display: inline-block;
+    justify-content: space-between;
+    text-decoration: none;
+}
+
+a{  
+    text-decoration: none;
+    list-style-type:none;
+    color: black;
+}
+
+a:hover{
+    color:coral;
+}
+
+/* CORPS */
+.corps{
+    display: flex;
+    margin: 2%;
+}
+
+.grand{
+    display: flex;
+    min-width: 90%;
+}
+
+/* ROND */ 
+.list_rond{    
+    display: flex;         /* --> list des 4 ronds */
+    flex-direction: column;
+    list-style-type:none;
+}
+
+.list_rond a{
+    display:block;                          /* --> list des 4 ronds --> les liens */
+    min-height: 65px; 
+    text-decoration: none;
+    color: black;
+    
+}
+
+.list_rond a:hover{
+    color: coral;
+    cursor: pointer;
+}
+
+
+/* IMAGE MILIEU*/
+#prog{
+    display: flex;
+    align-self: center;
+    max-width: 50%;                          
+    max-height: 50%;
+    margin-top: 5%;
+    -webkit-transform: scale(1);
+     transform: scale(1);
+     -webkit-transition: .3s ease-in-out;
+    transition: .3s ease-in-out;
+}
+
+#prog:hover {
+	-webkit-transform: scale(1.3);
+	transform: scale(1.3);
+}
+
+/* DESCRIPTION DU MAGASIN*/
+.desc{
+    display: flex;
+    flex-direction: column;
+    margin-left: 10%;
+    align-self: center;
+    min-width: 32%;
+}
+
+.list_resto{
+    display: flex;   
+    justify-content: space-between;
+}
+
+.list_resto li{
+    display: inline-block;
+    list-style-type:none;
+    justify-content: space-between;
+}
+
+/* COMMENTAIRES */
+
+.commentaires{
+    display: flex;
+    margin: 5%;
+    justify-content: end;
+    flex-direction: column;
+    max-width: 30%;
+    border-radius: 5%;
+    background-color: white;
+    padding: 15px;
+}
