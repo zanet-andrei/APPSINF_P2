@@ -279,13 +279,18 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			if (result[0] != null) {
 				allcom = ""
 				for (let i = 0; i < result.length; i++) {
-					allcom += "<p>" + result[i]["com"] + '<a href=/html/supp?number='+result[i]["com"] +'> supp </a></p>'
+					allcom += '<p class="allCom">' +'<span> Name: </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like </a></p>'
 				}
 			} else{
+                
 				allcom = "<p>Esapce commentaire vide.</p>"
 			}
-			res.render("html/restaurants.html", {test: allcom , description:"Voici une description fixe (qui ne vient pas de la bd)"})
-			
+
+            //if (req.session.username != null){
+			//res.render("html/restaurants.html", {test: allcom , compte = req.session.username ,description:"Voici une description fixe (qui ne vient pas de la bd)"})
+            //}else{
+                res.render("html/restaurants.html", {test: allcom ,compte: "Se connecter" ,description: "aaaaa"})
+            //}
 		});
 
 
@@ -295,7 +300,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     app.post("/html/restaurants.html", function(req, res, next) {
         if (req.body.com == "" || req.body.com.length < 1 )
         res.redirect("/html/restaurants.html")
-        db_com.collection("commentaire").insertOne({"com": req.body.com});
+        db_com.collection("commentaire").insert({"com": req.body.com , like:0});
 		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
 			if (err) throw err;
 			res.redirect("/html/restaurants.html")
@@ -303,7 +308,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
 
 	});
-
+/*
     app.get("/html/supp", function(req, res, next){
         db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
 			if (err) throw err;
@@ -314,6 +319,23 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			    res.redirect("/html/restaurants.html")
 		});
     })
+*/
+    app.get("/html/supp", function(req, res, next){
+        db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+                a = 0
+                a = result[req.query.number]["like"]
+                a = a+1
+                db_com.collection("commentaire").update({"com": req.query.text}, {$set: {like: a}})
+                db_com.collection("commentaire").update({"com": req.query.text}, {$set: {status: true}})
+            res.redirect("/html/restaurants.html")
+        });
+    })
+
+    //map resto 
+    app.get("/html/map.html"), function(req,res,next){
+        res.render("html/map.html" , {map: "toutes la baslise iframe qui se trouve dans la bd"})
+    }
+    
 
 
 
