@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap');
+* {
+	margin:0;
+	padding:0;
+	font-family:"Lato", Helvetica, sans-serif;
+	font-weight:400;
+}
+
+#searchbar {
+	padding:5px;
+}
+
+#divRestaurants {
+	display:flex;
+	justify-content:center;
+	align-items:center;
+}
+
+nav {
+	outline:thin solid;
+}
+
+#sec {
+	background-color:rgba(255,0,0,0.3);
+	padding:10px;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+}
+
+#sec * {
+	margin-right:4px;
+	margin-left:4px;
+}
+
+table {
+	border-collapse:separate;
+	border-spacing:40px;
+}
+
+th {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+th:last-child {
+	padding-right:60px;
+}
+
+tr {
+	outline: thin solid;
+}
+
+.image {
+	width:150px;
+	height:auto;
+}
+
+.tableLinks{
+	border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    color: #0000EE;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.imageButton{
+	border:none;
+	outline:none;
+	background:none;
+	cursor:pointer;
+}
+
+.btnImage{
+	max-width:200px;
+	height:auto;
+}
+
+#logoSite {
+	max-width:200px;
+	height:auto;
+}
+

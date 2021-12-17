@@ -47,24 +47,32 @@ a:hover{
 /* CORPS */
 .corps{
     display: flex;
-    margin: 2%;
+    background-color: cornflowerblue;
 }
 
 .grand{
     display: flex;
-    min-width: 90%;
+    margin-top: 3%;
+    background-color: chartreuse;
 }
 
 /* ROND */ 
+
+.rond{
+    margin-top: 3%;
+}
 .list_rond{    
     display: flex;         /* --> list des 4 ronds */
     flex-direction: column;
     list-style-type:none;
+    margin-top: 0;
+    min-height: 50%;
+    justify-content: space-between;
+    background-color: aqua;
 }
 
 .list_rond a{
-    display:block;                          /* --> list des 4 ronds --> les liens */
-    min-height: 65px; 
+    display:block;                          /* --> list des 4 ronds --> les liens */ 
     text-decoration: none;
     color: black;
     
@@ -75,14 +83,20 @@ a:hover{
     cursor: pointer;
 }
 
-
+/* Nom du resto */
+.grand h1{
+    display: flex;
+    margin-right: 1%;
+    background-color: blueviolet;
+}
 /* IMAGE MILIEU*/
+.image{
+    margin-top: 3%;
+    background-color: brown;
+}
 #prog{
     display: flex;
-    align-self: center;
-    max-width: 50%;                          
-    max-height: 50%;
-    margin-top: 5%;
+    max-block-size: 50%;
     -webkit-transform: scale(1);
      transform: scale(1);
      -webkit-transition: .3s ease-in-out;
@@ -98,31 +112,39 @@ a:hover{
 .desc{
     display: flex;
     flex-direction: column;
-    margin-left: 10%;
-    align-self: center;
-    min-width: 32%;
+    
 }
 
 .list_resto{
-    display: flex;   
+    display: flex;  
+    background-color: blue; 
+    min-width: 150%;
     justify-content: space-between;
 }
 
 .list_resto li{
-    display: inline-block;
     list-style-type:none;
-    justify-content: space-between;
 }
 
 /* COMMENTAIRES */
 
 .commentaires{
     display: flex;
-    margin: 5%;
+    margin: 1%;
     justify-content: end;
     flex-direction: column;
     max-width: 30%;
     border-radius: 5%;
     background-color: white;
     padding: 15px;
+}
+
+.allCom{
+    background-color: crimson;
+    display: flex;
+    justify-content: space-between;
+}
+
+.allCom a{
+    font-size: 75%;
 }
