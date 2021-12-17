@@ -74,37 +74,50 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         res.redirect("html/index.html");
     });
 
-    //Redirection page connexion compte
+    
 
 	app.get("/html/findrestaurant", function(req, res, next) {
 		res.render("html/pageresto.html", {resto:req.query.restaurantname});
 	});
 
+    //Redirection page connexion compte
     app.get("/html/test_page_co.html", function(req, res, next) {
         if (req.session.username == null) {
-            res.render("html/test_page_co.html",{Connexion : "Connexion", pseudo : "",error:""});
+            res.render("html/test_page_co.html",{Connexion : "Connexion",error :""});
+        }else if (req.session.username == "admin") {
+            res.render("html/test_page_co.html",{Connexion : "Bienvenue Boss" ,error:"",Admin:"Ajouter un restaurant"});
         } else {
-            res.render("html/test_page_co.html",{Connexion : "Bienvenue", pseudo : req.session.username,error:""});
+            res.render("html/test_page_co.html",{Connexion : "Bienvenue " + req.session.username ,error:""});
+        }
+    });
+
+    //Redirect page admin
+
+    app.get("/html/ajout_resto", function(req, res, next) {
+        if (req.session.username == "admin") {
+            res.render("html/ajout_resto.html",{Connexion : "Bienvenue Boss",error:"",Admin : ""});
+        } else {
+            res.render("html/test_page_co.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
         }
     });
 
     //Redirection page création compte
     app.get("/html/test_page_crea_compte.html", function(req, res, next) {
         if (req.session.username == null) {
-            res.render("html/test_page_crea_compte.html",{Connexion : "Connexion", pseudo : "",error:""});
+            res.render("html/test_page_crea_compte.html",{Connexion : "Connexion",error :""});
+        }else {
+            res.render("html/test_page_crea_compte.html",{Connexion : "Bienvenue " + req.session.username ,error:"",Admin :""});
+        }
+    });  
+
+    //Redirection contact admin
+    app.get("/html/Contact_admin", function(req, res, next) {
+        if (req.session.username == "admin") {
+            res.render("html/Contact_admin.html",{Connexion : "Bienvenue Boss",error:"",Admin : ""});
         } else {
-            res.render("html/test_page_crea_compte.html",{Connexion : "Bienvenue", pseudo : req.session.username,error:""});
+            res.render("html/test_page_co.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
         }
     });
-
-    //Redirection page
-    app.get("/html/page_test_pseudo.html", function(req, res, next) {
-        if (req.session.username == null){
-            res.render("html/page_test_pseudo.html",{Connexion : "Connexion", pseudo : ""});
-        }else{        
-            res.render("html/page_test_pseudo.html",{Connexion : "Bienvenue", pseudo : req.session.username});
-        }
-    });    
 
     // Barre de recherche (selon la description)
 
@@ -260,6 +273,16 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     );
 
     app.get("/html/index.html", function(req, res, next) {
+        //barre nav alex
+
+        if (req.session.username == null) {
+            res.render("html/index.html",{Connexion : "Connexion",error :""});
+        }else if (req.session.username == "admin") {
+            res.render("html/index.html",{Connexion : "Bienvenue Boss" ,error:"",Admin:"Ajouter un restaurant"});
+        } else {
+            res.render("html/index.html",{Connexion : "Bienvenue " + req.session.username ,error:""});
+        }
+        //fin barre nav
         db_restaurants.collection("restaurants").find({}).sort({_id:-1}).toArray(function(err, result) {
             if (err) throw err;
             if (result[0] != null) {
@@ -296,6 +319,8 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
 
 	app.get("/html/restaurants.html", function(req, res, next) {
+        
+        
 
 		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
 			if (err) throw err;
