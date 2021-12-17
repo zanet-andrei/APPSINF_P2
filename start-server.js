@@ -74,14 +74,32 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         res.redirect("html/index.html");
     });
 
+    //Redirection page connexion compte
     app.get("/html/test_page_co.html", function(req, res, next) {
-        res.render("html/test_page_co.html", {error : ""});
+        if (req.session.username == null) {
+            res.render("html/test_page_co.html",{Connexion : "Connexion", pseudo : "",error:""});
+        } else {
+            res.render("html/test_page_co.html",{Connexion : "Bienvenue", pseudo : req.session.username,error:""});
+        }
     });
 
+    //Redirection page création compte
     app.get("/html/test_page_crea_compte.html", function(req, res, next) {
-        res.render("html/test_page_crea_compte.html",{error : ""});
+        if (req.session.username == null) {
+            res.render("html/test_page_crea_compte.html",{Connexion : "Connexion", pseudo : "",error:""});
+        } else {
+            res.render("html/test_page_crea_compte.html",{Connexion : "Bienvenue", pseudo : req.session.username,error:""});
+        }
     });
 
+    //Redirection page
+    app.get("/html/page_test_pseudo.html", function(req, res, next) {
+        if (req.session.username == null){
+            res.render("html/page_test_pseudo.html",{Connexion : "Connexion", pseudo : ""});
+        }else{        
+            res.render("html/page_test_pseudo.html",{Connexion : "Bienvenue", pseudo : req.session.username});
+        }
+    });    
     // Barre de recherche (selon la description)
 
     app.post("/html/search", function(req, res, next) {
