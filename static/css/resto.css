@@ -1,3 +1,5 @@
+
+
 body{
     background-color:whitesmoke;
     padding: 0;
@@ -7,7 +9,8 @@ body{
 
 /* ENTETE */
 .tete{
-    display: flex;                          /* Grand bloc blanc au top */          
+    display: flex;                          /* Grand bloc blanc au top */    
+    
     background-color:brown;
     padding: 1%;
     padding-left: 10%;
@@ -22,7 +25,7 @@ body{
 .list_tete{
     display: flex;
     margin-left: 10%;
-    min-width: 65%;
+    min-width: 60%;
     justify-content: space-between;
     
 }
@@ -47,13 +50,11 @@ a:hover{
 /* CORPS */
 .corps{
     display: flex;
-    background-color: cornflowerblue;
 }
 
 .grand{
     display: flex;
     margin-top: 3%;
-    background-color: chartreuse;
 }
 
 /* ROND */ 
@@ -68,7 +69,6 @@ a:hover{
     margin-top: 0;
     min-height: 50%;
     justify-content: space-between;
-    background-color: aqua;
 }
 
 .list_rond a{
@@ -87,12 +87,10 @@ a:hover{
 .grand h1{
     display: flex;
     margin-right: 1%;
-    background-color: blueviolet;
 }
 /* IMAGE MILIEU*/
 .image{
     margin-top: 3%;
-    background-color: brown;
 }
 #prog{
     display: flex;
@@ -112,12 +110,12 @@ a:hover{
 .desc{
     display: flex;
     flex-direction: column;
+    margin-left: 5%;
     
 }
 
 .list_resto{
     display: flex;  
-    background-color: blue; 
     min-width: 150%;
     justify-content: space-between;
 }
@@ -140,7 +138,6 @@ a:hover{
 }
 
 .allCom{
-    background-color: crimson;
     display: flex;
     justify-content: space-between;
 }

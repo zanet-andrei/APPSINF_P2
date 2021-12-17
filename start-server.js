@@ -300,10 +300,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
 			if (err) throw err;
 			if (result[0] != null) {
-				allcom = ""
-				for (let i = 0; i < result.length; i++) {
-					allcom += '<p class="allCom">' +'<span> Name: </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like </a></p>'
-				}
+                allcom = ""
+                if (result.length == 1){
+                    allcom = allcom += '<p class="allCom">' +'<span>'+req.session.username+' </span> '+ result[0]["com"] + '<a href=/html/supp?number='+0 +'&text='+result[0]["com"]+'> Like '+" " +result[0]["like"] +'</a></p>'
+                }else{
+                    for (let i = 0; i < result.length; i++) {
+                        allcom += '<p class="allCom">' +'<span>'+req.session.username+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
+                    }
+                }
 			} else{
                 
 				allcom = "<p>Esapce commentaire vide.</p>"
@@ -321,13 +325,19 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     
 	
     app.post("/html/restaurants.html", function(req, res, next) {
-        if (req.body.com == "" || req.body.com.length < 1 )
-        res.redirect("/html/restaurants.html")
-        db_com.collection("commentaire").insert({"com": req.body.com , like:0});
-		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
-			if (err) throw err;
-			res.redirect("/html/restaurants.html")
-		});
+        if (req.session.username != null){
+            if (req.body.com == "" || req.body.com.length < 1 ){
+                res.redirect("/html/restaurants.html")
+            }else{
+                db_com.collection("commentaire").insert({"com": req.body.com , like:0});
+                //db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+                   // if (err) throw err;
+                res.redirect("/html/restaurants.html")
+            }
+            
+        }else{
+            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , compte : "Se connecter"})
+        }
 
 
 	});
@@ -344,6 +354,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     })
 */
     app.get("/html/supp", function(req, res, next){
+        if (db_account.collection("accounts"))
         db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
                 a = 0
                 a = result[req.query.number]["like"]
@@ -358,6 +369,8 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     app.get("/html/map.html"), function(req,res,next){
         res.render("html/map.html" , {map: "toutes la baslise iframe qui se trouve dans la bd"})
     }
+
+
 
 
     /*mes test 
