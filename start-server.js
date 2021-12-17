@@ -335,8 +335,25 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     app.get("/html/map.html"), function(req,res,next){
         res.render("html/map.html" , {map: "toutes la baslise iframe qui se trouve dans la bd"})
     }
-    
 
+
+    /*mes test 
+    if (//verifier que le mec est pas encore dans la bd)
+        db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+        if (result[RECUPERER LE RESTO]["rdvMidi"] < result[RECUPERER LE RESTO]["max"]){
+            // avec une bd de reservation ajouter le nom de l'utilisateur qui reserve
+        }else{
+            //dire que le nombre de place est deja complet
+        }
+    }else{
+        //dire que le mec a deja une table a ce moment la 
+    }    
+
+    // comment orga les bd ? 
+    // --> Une pour les resto 
+    // -- > Une pour les reservation 
+    // -->
+    */
 
 
 
