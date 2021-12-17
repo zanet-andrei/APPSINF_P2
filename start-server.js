@@ -6,9 +6,9 @@ let express = require('express'),
     https = require("https"),
     fs = require("fs"),
     session = require("express-session");
-const { truncate } = require('fs/promises');
-const { addAbortSignal } = require('stream');
-    levenshtein = require('js-levenshtein');
+	const { truncate } = require('fs/promises');
+	const { addAbortSignal } = require('stream');
+    tf_idf = require("tf-idf-search");
     //bcrytp = require("bcryptjs");
     crypto = require("crypto-js");
 
@@ -74,6 +74,10 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         res.redirect("html/index.html");
     });
 
+	app.get("/html/findrestaurant", function(req, res, next) {
+		res.render("html/pageresto.html", {resto:req.query.restaurantname});
+	});
+	
     app.get("/html/test_page_co.html", function(req, res, next) {
         res.render("html/test_page_co.html", {error : ""});
     });
@@ -82,69 +86,61 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         res.render("html/test_page_crea_compte.html",{error : ""});
     });
 
-    // Barre de recherche (selon la description)
+    // Barre de recherche (selon le nom du restaurant)
 
-    app.post("/html/search", function(req, res, next) {
+     app.get("/html/search", function(req, res, next) {
         db_restaurants.collection("restaurants").find({}).toArray(function(err, result) {
             if (err) throw err;
             if (result[0] != null) {
+				
+				let restaurantNames = []
+				search = req.query.search
+				
+				tfidf = new tf_idf()
+				
+				for (let i = 0; i < result.length; i++) {
+					restaurantNames.push(result[i]["name"]);
+				}
+				
+				var corpus = tfidf.createCorpusFromStringArray(restaurantNames);
+				
+				var searchResults = tfidf.rankDocumentsByQuery(search)
+				tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
+				count = 0;
 
-                tableToReturn = "<tr><th>Restaurant</th><th>Adresse</th><th>Temps d'attente</th><th>Temps d'attente moyen</th></tr>";
-                // Objet qui contient des array triés par distance entre la recherche et les éléments de la BDD
-                let distance = new Object();
-                for (let i = 0; i < result.length; i++) {
-                    // Calculer la distance entre la recherche de l'utilisateur et chaque élément de la BDD
-                    dist = levenshtein(result[i]["restaurant"], req.body.search);
-                    if (distance[dist] == null) {
-                        distance[dist] = []
-                    }
-                    arr = [] // Tableau qui contient les infos liées à l'élément traité
-                    for (let x in result[i]) {
-                        if (x != "_id") {
-                            arr.push(result[i][x]);
-                        }
-                    }
-                    distance[dist].push(arr);
-                }
-                keys = []; // Tableau des clés à trier par ordre croissant afin de trouver les résultats les plus proches
-                for (let key in distance) {
-                    keys.push(parseInt(key));
-                }
-
-                keys = keys.sort(function(a, b) { return a - b; }); // Trier par ordre croissant
-
-                nbRes = 5; // Nombre de résultats maximum à renvoyer
-
-                searchResults = [] // Tableau contenant les résultats les plus pertinents de la recherche
-
-                while (nbRes > 0) {
-                    if (keys[0] == null) { // S'il n'y a plus aucun élément à comparer
-                        nbRes = 0;
-                    } else if (distance[keys[0]][0] == null) { // Retire la clé en cours d'utilisation s'il n'y a plus d'élément
-                                                               // avec le poids keys[0]
-                        keys.splice(0, 1);
-                    } else {
-                        searchResults.push(distance[keys[0]].splice(0, 1)); // Retire le résultat de l'objet distance et le
-                                                                            // rajoute au tableau de résultats
-                        nbRes -= 1
-                    }
-                }
-                for (let x in searchResults) { // Création tableau à renvoyer
-                    tableToReturn += "<tr>"
-                    for (let y in searchResults[x][0]) {
-                        tableToReturn += "<td>" + searchResults[x][0][y] + "</td>"
-                    }
-                    tableToReturn += "</tr>"
-                }
-
-
+				maxResults = 3 // nombre arbitraire de resultats maximum
+				
+				while (maxResults > 0) {
+					for (let x in searchResults) {
+						maxResults -= 1
+						if (maxResults < 0) {
+							break;
+						} else {
+							tableToReturn += "<tr><form action='/html/findrestaurant' method='get'>";
+							index = searchResults[x]["index"]
+							for (let y in result[index]) {
+								if (y != "_id") {
+									if (count < 1) {
+										count = 1;
+										tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[index]["name"] + "' class='ImageButton'><img src='" + result[index][y] + "' class='btnImage'></td>";
+									} else {
+										tableToReturn += "<td><input type='submit' name='restaurantname' class='tablelinks' value='" + result[index][y] + "'></td>";
+									}
+									
+								}
+							}
+							tableToReturn += "</form></tr>"
+							count = 0;
+						}	
+					}
+				}
+				
             } else { // Si la BDD est vide
                 tableToReturn = "<p>Aucun résultat ne correspond à votre recherche</p>"
             }
             res.render("html/index.html", {table:tableToReturn});
         });
     });
-
 
     //création de compte (Alex)
 
@@ -247,18 +243,25 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         db_restaurants.collection("restaurants").find({}).sort({_id:-1}).toArray(function(err, result) {
             if (err) throw err;
             if (result[0] != null) {
-                tableToReturn = "<tr><th>Restaurant</th><th>Adresse</th><th>Temps d'attente</th><th>Temps d'attente moyen</th></tr>";
+				count = 0
+                tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
                 for (let i = 0; i < result.length; i++) {
-                    tableToReturn += "<tr>";
+                    tableToReturn += "<tr><form action='/html/findrestaurant' method='get'>";
                     for (let x in result[i]) {
                         if (x != "_id") {
-                            tableToReturn += "<td>" + result[i][x] + "</td>";
+							if (count < 1) {
+								tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[i]["name"] + "' class='ImageButton'><img src='" + result[i][x] + "' class='btnImage'></td>";
+								count = 1;
+							} else {
+								tableToReturn += "<td><input type='submit' name='restaurantname' class='tablelinks' value='" + result[i][x] + "'></td>";
+							}
                         }
                     }
-                    tableToReturn += "</tr>";
+					tableToReturn += "</form></tr>"
+					count = 0;
                 }
             } else {
-                tableToReturn = "<p>Aucun élément ne correspond à votre recherche.</p>";
+                tableToReturn = "<p>Aucun élément ne correspond à votre recherche.</p>"
             }
 
             res.render("html/index.html", {table:tableToReturn});
