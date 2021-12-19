@@ -71,6 +71,16 @@ header{
 #pseudo:hover,#Connexion:hover{
     color: rgba(0, 136, 169, 0.5); 
 }
+
+#deco{
+    color: #f5f5f5;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+#deco:hover{
+    color: red; 
+}
 /*--------------------------------------Reste de la page---------------------------------------------------*/
 
 #Contenu_page{
