@@ -75,18 +75,16 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     });
 
     
-
-	app.get("/html/findrestaurant", function(req, res, next) {
-		res.render("html/pageresto.html", {resto:req.query.restaurantname});
-	});
-
     //Redirection page connexion compte
     app.get("/html/test_page_co.html", function(req, res, next) {
         if (req.session.username == null) {
             res.render("html/test_page_co.html",{Connexion : "Connexion",error :""});
         }else if (req.session.username == "admin") {
             res.render("html/test_page_co.html",{Connexion : "Bienvenue Boss" ,error:"",Admin:"Ajouter un restaurant"});
-        } else {
+        }else if (req.session.username != null){
+            req.session.destroy();
+            res.render("html/test_page_co.html")
+        }else {
             res.render("html/test_page_co.html",{Connexion : "Bienvenue " + req.session.username ,error:""});
         }
     });
@@ -151,7 +149,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 						if (maxResults < 0) {
 							break;
 						} else {
-							tableToReturn += "<tr><form action='/html/findrestaurant' method='get'>";
+							tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
 							index = searchResults[x]["index"]
 							for (let y in result[index]) {
 								if (y != "_id") {
@@ -295,7 +293,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 				count = 0
                 tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
                 for (let i = 0; i < result.length; i++) {
-                    tableToReturn += "<tr><form action='/html/findrestaurant' method='get'>";
+                    tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
                     for (let x in result[i]) {
                         if (x != "_id") {
 							if (count < 1) {
@@ -352,7 +350,9 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			} else{
 				allcom = "<p>Esapce commentaire vide.</p>"
 			}
-            res.render("html/restaurants.html", {test: allcom ,compte: "Se connecter" ,description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
+
+            res.render("html/restaurants.html", {name : req.query.restaurantname, test: allcom ,compte: "Se connecter" ,description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
+
 		});
 	});
     
@@ -377,7 +377,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 res.redirect("/html/restaurants.html")
             }
         }else{
-            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
+            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , name : req.query.restaurantname, description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
         }
 	});
 
