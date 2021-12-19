@@ -326,8 +326,15 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
 
 	app.get("/html/restaurants.html", function(req, res, next) {
-        
-        
+        if (req.session.username == null) {
+            error_pseudo = "Connexion";
+        }else if (req.session.username == "admin") {
+            error_pseudo = "Hello Boss";
+            admin_ = "Ajouter un restaurant";
+        } else {
+            error_pseudo = "Bienvenue " + req.session.username;
+            admin_ = ""
+        }        
 
 		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
 			if (err) throw err;
@@ -348,7 +355,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             //if (req.session.username != null){
 			//res.render("html/restaurants.html", {test: allcom , compte = req.session.username ,description:"Voici une description fixe (qui ne vient pas de la bd)"})
             //}else{
-                res.render("html/restaurants.html", {test: allcom ,compte: "Se connecter" ,description: "aaaaa"})
+            res.render("html/restaurants.html", {test: allcom ,compte: "Se connecter" ,description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
             //}
 		});
 
