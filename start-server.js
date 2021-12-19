@@ -101,6 +101,16 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         }
     });
 
+    //ajout des elements a la db 
+    app.post("/html/create", function(req, res, next){
+        if (req.body.nameResto != ""){
+            db_restaurants.collection("restaurants").insert({"name" : req.body.nameResto})
+        }
+        if (req.body.nameAddress != ""){
+            db_restaurants.collection("restaurants").insert({"address" : req.body.nameResto})
+        }
+    })
+
     //Redirection page création compte
     app.get("/html/test_page_crea_compte.html", function(req, res, next) {
         if (req.session.username == null) {
@@ -329,6 +339,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
         if (req.session.username == null) {
             error_pseudo = "Connexion";
+            admin_ = ""
         }else if (req.session.username == "admin") {
             error_pseudo = "Hello Boss";
             admin_ = "Ajouter un restaurant";
@@ -357,15 +368,26 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     
 	
     app.post("/html/restaurants.html", function(req, res, next) {
+        if (req.session.username == null) {
+            error_pseudo = "Connexion";
+            admin_ = ""
+        }else if (req.session.username == "admin") {
+            error_pseudo = "Hello Boss";
+            admin_ = "Ajouter un restaurant";
+        } else {
+            error_pseudo = "Bienvenue " + req.session.username;
+            admin_ = ""
+        }
         if (req.session.username != null){
             if (req.body.com == "" || req.body.com.length < 1 ){
                 res.redirect("/html/restaurants.html")
             }else{
+                db_restaurants.collection("restaurants").insert({"time" : req.body.time})
                 db_com.collection("commentaire").insert({"com": req.body.com , like:0 , pseudo : req.session.username});
                 res.redirect("/html/restaurants.html")
             }
         }else{
-            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , compte : "Se connecter"})
+            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
         }
 	});
 
