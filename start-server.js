@@ -91,11 +91,11 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         }
     });
 
-    //Redirect page admin
+    //Redirect page ajout resto admin
 
-    app.get("/html/ajout_resto", function(req, res, next) {
+    app.get("/html/ajout_resto.html", function(req, res, next) {
         if (req.session.username == "admin") {
-            res.render("html/ajout_resto.html",{Connexion : "Bienvenue Boss",error:"",Admin : ""});
+            res.render("html/ajout_resto.html",{Connexion : "Hello Boss",error:"",Admin : ""});
         } else {
             res.render("html/test_page_co.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
         }
@@ -111,11 +111,13 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     });  
 
     //Redirection contact admin
-    app.get("/html/Contact_admin", function(req, res, next) {
-        if (req.session.username == "admin") {
-            res.render("html/Contact_admin.html",{Connexion : "Bienvenue Boss",error:"",Admin : ""});
+    app.get("/html/Contact_admin.html", function(req, res, next) {
+        if (req.session.username == null) {
+            res.render("html/Contact_admin.html",{Connexion : "Connexion",error :""});
+        }else if (req.session.username == "admin") {
+            res.render("html/Contact_admin.html",{Connexion : "Hello Boss" ,error:"",Admin:"Ajouter un restaurant"});
         } else {
-            res.render("html/test_page_co.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
+            res.render("html/Contact_admin.html",{Connexion : "Bienvenue " + req.session.username ,error:""});
         }
     });
 
@@ -274,13 +276,17 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
     app.get("/html/index.html", function(req, res, next) {
         //barre nav alex
-
+        var error_pseudo = ""
+        var admin_ = ""
+        
+        
         if (req.session.username == null) {
-            res.render("html/index.html",{Connexion : "Connexion",error :""});
+            error_pseudo = "Connexion";
         }else if (req.session.username == "admin") {
-            res.render("html/index.html",{Connexion : "Bienvenue Boss" ,error:"",Admin:"Ajouter un restaurant"});
+            error_pseudo = "Hello Boss";
+            admin_ = "Ajouter un restaurant";
         } else {
-            res.render("html/index.html",{Connexion : "Bienvenue " + req.session.username ,error:""});
+            error_pseudo = "Bienvenue " + req.session.username;
         }
         //fin barre nav
         db_restaurants.collection("restaurants").find({}).sort({_id:-1}).toArray(function(err, result) {
@@ -307,7 +313,8 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 tableToReturn = "<p>Aucun élément ne correspond à votre recherche.</p>"
             }
 
-            res.render("html/index.html", {table:tableToReturn});
+            res.render("html/index.html", {table:tableToReturn, Connexion : error_pseudo ,Admin : admin_});
+    
         });
     });
 
