@@ -81,6 +81,17 @@
                 <form action="/html/restaurants.html" method="post"  >
                     <p> Commentaire </p>
                     <textarea name="com" rows="2" cols="50" id="com"></textarea>
+                    <p>Temps attendu</p>
+                    <select name="temps">
+                        <option value="min">-- --</option>
+                        <option value="min">5 min</option>
+                        <option value="min">10 min</option>
+                        <option value="min">15 min</option>
+                        <option value="min">20 min</option>
+                        <option value="min">25 min</option>
+                        <option value="min">30 min</option>
+                        <option value="min">+30 min</option>
+                    </select>
                     <input class="boutons" id="PosterCom" type="submit" value="Poster">
                 </form>
                 <p class="error">{{error}}</p>

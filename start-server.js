@@ -320,32 +320,22 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
 	app.get("/html/restaurants.html", function(req, res, next) {
         
-        
-
 		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
 			if (err) throw err;
 			if (result[0] != null) {
                 allcom = ""
                 if (result.length == 1){
-                    allcom = allcom += '<p class="allCom">' +'<span>'+req.session.username+' </span> '+ result[0]["com"] + '<a href=/html/supp?number='+0 +'&text='+result[0]["com"]+'> Like '+" " +result[0]["like"] +'</a></p>'
+                    allcom = allcom += '<p class="allCom">' +'<span>'+result[0]["pseudo"]+' </span> '+ result[0]["com"] + '<a href=/html/supp?number='+0 +'&text='+result[0]["com"]+'> Like '+" " +result[0]["like"] +'</a></p>'
                 }else{
                     for (let i = 0; i < result.length; i++) {
-                        allcom += '<p class="allCom">' +'<span>'+req.session.username+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
+                        allcom += '<p class="allCom">' +'<span>'+result[i]["pseudo"]+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
                     }
                 }
 			} else{
-                
 				allcom = "<p>Esapce commentaire vide.</p>"
 			}
-
-            //if (req.session.username != null){
-			//res.render("html/restaurants.html", {test: allcom , compte = req.session.username ,description:"Voici une description fixe (qui ne vient pas de la bd)"})
-            //}else{
-                res.render("html/restaurants.html", {test: allcom ,compte: "Se connecter" ,description: "aaaaa"})
-            //}
+            res.render("html/restaurants.html", {test: allcom ,compte: "Se connecter" ,description: "aaaaa"}) 
 		});
-
-
 	});
     
 	
@@ -354,30 +344,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             if (req.body.com == "" || req.body.com.length < 1 ){
                 res.redirect("/html/restaurants.html")
             }else{
-                db_com.collection("commentaire").insert({"com": req.body.com , like:0});
-                //db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
-                   // if (err) throw err;
+                db_com.collection("commentaire").insert({"com": req.body.com , like:0 , pseudo : req.session.username});
                 res.redirect("/html/restaurants.html")
             }
-            
         }else{
             res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , compte : "Se connecter"})
         }
-
-
 	});
-/*
-    app.get("/html/supp", function(req, res, next){
-        db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
-			if (err) throw err;
-            if (result.length == 1 )
-                db_com.collection("commentaire").remove({"com" : result[0]["com"]})
-            else
-                db_com.collection("commentaire").remove({"com" : req.query.number})
-			    res.redirect("/html/restaurants.html")
-		});
-    })
-*/
+
     app.get("/html/supp", function(req, res, next){
         if (db_account.collection("accounts"))
         db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
@@ -394,28 +368,6 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     app.get("/html/map.html"), function(req,res,next){
         res.render("html/map.html" , {map: "toutes la baslise iframe qui se trouve dans la bd"})
     }
-
-
-
-
-    /*mes test 
-    if (//verifier que le mec est pas encore dans la bd)
-        db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
-        if (result[RECUPERER LE RESTO]["rdvMidi"] < result[RECUPERER LE RESTO]["max"]){
-            // avec une bd de reservation ajouter le nom de l'utilisateur qui reserve
-        }else{
-            //dire que le nombre de place est deja complet
-        }
-    }else{
-        //dire que le mec a deja une table a ce moment la 
-    }    
-
-    // comment orga les bd ? 
-    // --> Une pour les resto 
-    // -- > Une pour les reservation 
-    // -->
-    */
-
 
 
 
