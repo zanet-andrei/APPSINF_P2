@@ -176,7 +176,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 						if (maxResults < 0) {
 							break;
 						} else {
-							tableToReturn += "<tr><form action='/html/findrestaurant' method='get'>";
+							tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
 							index = searchResults[x]["index"]
 							for (let y in result[index]) {
 								if (y != "_id") {
@@ -377,7 +377,9 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			} else{
 				allcom = "<p>Esapce commentaire vide.</p>"
 			}
-            res.render("html/restaurants.html", {test: allcom ,compte: "Se connecter" ,description: "aaaaa",Connexion : error_pseudo, Admin : admin_, resto:req.query.restaurantname})
+
+            res.render("html/restaurants.html", {name : req.query.restaurantname, test: allcom ,compte: "Se connecter" ,description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
+
 		});
 	});
     
@@ -403,7 +405,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 res.redirect("/html/restaurants.html")
             }
         }else{
-            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
+            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , name : req.query.restaurantname, description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
         }
 	});
 
