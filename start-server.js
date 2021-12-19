@@ -74,11 +74,6 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         res.redirect("html/index.html");
     });
 
-	//app.get("/html/findrestaurant", function(req, res, next) {
-		// ici
-		//res.render("html/restaurants.html", {resto:req.query.restaurantname});
-	//});
-
     //Redirection page connexion compte
     app.get("/html/test_page_co.html", function(req, res, next) {
         if (req.session.username == null) {
@@ -101,14 +96,35 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     });
 
     //ajout des elements a la db 
-    app.post("/html/create", function(req, res, next){
-        if (req.body.nameResto != ""){
-            db_restaurants.collection("restaurants").insert({"name" : req.body.nameResto})
-        }
-        if (req.body.nameAddress != ""){
-            db_restaurants.collection("restaurants").insert({"address" : req.body.nameResto})
-        }
-    })
+
+	app.post("/html/ajoutResto", function(req, res, next) {
+		if (req.session.username == "admin") {
+			desc = req.body.description;
+			nameresto = req.body.nameResto;
+			imagelink = req.body.imageLink;
+			address = req.body.nameAddress;
+			if (address == "" || desc == "" || nameresto == "" || imagelink == "") {
+				res.render("html/ajout_resto.html", {error:"Veuillez remplir toutes les cases"});
+			} else {
+				db_restaurants.collection("restaurants").findOne({"name": nameresto}, (err, doc) => {
+					if (err) throw err;
+					if (doc == null) {
+						db_restaurants.collection("restaurants").findOne({"address": address}, (err, doc) => {
+							if (err) throw err;
+							if (doc == null) {
+								db_restaurants.collection("restaurants").insertOne({"imagelink": imagelink, "name": nameresto, "address": address, "desc": desc});
+								res.render("html/ajout_resto.html", {error:"Restaurant ajouté"});
+							} else {
+								res.render("html/ajout_resto.html", {error:"Cette addresse existe déjà dans la base de données"});
+							}
+						});
+					} else {
+						res.render("html/ajout_resto.html", {error:"Un restaurant existe déjà avec ce nom dans la base de données"});
+					}
+				});
+			}
+		}
+	});
 
     //Redirection page création compte
     app.get("/html/test_page_crea_compte.html", function(req, res, next) {
@@ -302,7 +318,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             if (err) throw err;
             if (result[0] != null) {
 				count = 0
-                tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
+                tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
                 for (let i = 0; i < result.length; i++) {
                     tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
                     for (let x in result[i]) {
@@ -367,6 +383,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     
 	
     app.post("/html/restaurants.html", function(req, res, next) {
+		
         if (req.session.username == null) {
             error_pseudo = "Connexion";
             admin_ = ""
@@ -381,8 +398,8 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             if (req.body.com == "" || req.body.com.length < 1 ){
                 res.redirect("/html/restaurants.html")
             }else{
-                db_restaurants.collection("restaurants").insert({"time" : req.body.time})
-                db_com.collection("commentaire").insert({"com": req.body.com , like:0 , pseudo : req.session.username});
+                db_restaurants.collection("restaurants").insertOne({"time" : req.body.time})
+                db_com.collection("commentaire").insertOne({"com": req.body.com , like:0 , pseudo : req.session.username});
                 res.redirect("/html/restaurants.html")
             }
         }else{
