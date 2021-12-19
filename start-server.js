@@ -75,11 +75,6 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     });
 
     
-
-	app.get("/html/findrestaurant", function(req, res, next) {
-		res.render("html/restaurants.html", {resto:req.query.restaurantname});
-	});
-
     //Redirection page connexion compte
     app.get("/html/test_page_co.html", function(req, res, next) {
         if (req.session.username == null) {
@@ -296,7 +291,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 				count = 0
                 tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
                 for (let i = 0; i < result.length; i++) {
-                    tableToReturn += "<tr><form action='/html/findrestaurant' method='get'>";
+                    tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
                     for (let x in result[i]) {
                         if (x != "_id") {
 							if (count < 1) {
@@ -353,7 +348,9 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			} else{
 				allcom = "<p>Esapce commentaire vide.</p>"
 			}
+
             res.render("html/restaurants.html", {name : req.query.restaurantname, test: allcom ,compte: "Se connecter" ,description: "aaaaa",Connexion : error_pseudo, Admin : admin_})
+
 		});
 	});
     
