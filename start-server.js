@@ -373,7 +373,18 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             admin_ = "";
             dec = "Deconnexion";
         }        
+        //info de la page
+        db_restaurants.collection("restaurants").find({}).sort({_id:-1}).toArray(function(err, result) {
+			for (let i = 0; i < result.length; i++) {
+                if (req.query.restaurantname == result[i]["name"]){
+                    nameEnd = result[i]["name"]
+                    descEnd = result[i]["desc"]
+                }
+            }
+        })
 
+        //commentaires
+        er =""
 		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
 			if (err) throw err;
 			if (result[0] != null) {
@@ -388,8 +399,11 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			} else{
 				allcom = "<p>Esapce commentaire vide.</p>"
 			}
+            if (req.query.errorCom == 1){
+                er = "Vous devez être connecté pour poster un commentaire ! "
+            }
 
-            res.render("html/restaurants.html", {name : req.query.restaurantname, test: allcom ,compte: "Se connecter" ,description: "aaaaa",Connexion : error_pseudo, Admin : admin_, Deconnexion : dec })
+            res.render("html/restaurants.html", {errorCom :er ,name : nameEnd, test: allcom ,compte: "Se connecter" ,description: descEnd,Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
 
 		});
 	});
@@ -419,7 +433,8 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 res.redirect("/html/restaurants.html")
             }
         }else{
-            res.render("html/restaurants.html", {error : "Vous devez être connecté pour poster un commentaire ! " , name : req.query.restaurantname, description: "aaaaa",Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
+            res.redirect("restaurants.html?errorCom=1")
+           //res.render("html/restaurants.html", { name : nameResto , errorCom : "Vous devez être connecté pour poster un commentaire ! " , name : req.query.restaurantname, description: "desc",Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
         }
 	});
 
