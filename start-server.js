@@ -29,7 +29,7 @@ function verif_mdp(mot_de_passe){
     //console.log(mdp)
     const majuscules = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 	const minuscule = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-	const special = ['.',"*","[","]","(",")","$","{","}","=","!","<",">","|",":","-","_"];
+	const special = ['.',"*","[","]","(",")","$","{","}","=","!","<",">","|",":","-","_","#"];
 	const numbers = ["0","1", "2", "3", "4", "5", "6", "7", "8", "9"];
     let bool_maj = false;
     let bool_min = false;
@@ -100,16 +100,6 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             res.render("html/test_page_co.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
         }
     });
-
-    //ajout des elements a la db 
-    app.post("/html/create", function(req, res, next){
-        if (req.body.nameResto != ""){
-            db_restaurants.collection("restaurants").insert({"name" : req.body.nameResto})
-        }
-        if (req.body.nameAddress != ""){
-            db_restaurants.collection("restaurants").insert({"address" : req.body.nameResto})
-        }
-    })
 
     //Redirection page création compte
     app.get("/html/test_page_crea_compte.html", function(req, res, next) {
