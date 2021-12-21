@@ -380,6 +380,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         //Initialisation info restaurant
         nameEnd = ""
         descEnd = ""
+        imageEnd =""
         if (req.query.restaurantname != null){    
             db_restaurants.collection("restaurants").findOne({"name" : req.query.restaurantname}, (err,doc) => {
                 if (err) throw err;
