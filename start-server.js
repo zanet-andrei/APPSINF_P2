@@ -359,7 +359,6 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
 
 	app.get("/html/restaurants.html", function(req, res, next) {
-
         if (req.session.username == null) {
             error_pseudo = "";
             admin_ = "";
@@ -379,9 +378,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 if (req.query.restaurantname == result[i]["name"]){
                     nameEnd = result[i]["name"]
                     descEnd = result[i]["desc"]
+                    //temp = result[i]["imagelink"]
                 }
             }
         })
+
+        // image 
+
+        //imageEnd = '<img id="prog" src='+temp+">"
 
         //commentaires
         er =""
@@ -389,15 +393,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			if (err) throw err;
 			if (result[0] != null) {
                 allcom = ""
-                if (result.length == 1){
-                    allcom = allcom += '<p class="allCom">' +'<span>'+result[0]["pseudo"]+' </span> '+ result[0]["com"] + '<a href=/html/supp?number='+0 +'&text='+result[0]["com"]+'> Like '+" " +result[0]["like"] +'</a></p>'
-                }else{
-                    for (let i = 0; i < result.length; i++) {
-                        allcom += '<p class="allCom">' +'<span>'+result[i]["pseudo"]+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
+                for (let i = 0; i < result.length; i++) {
+                    if (result[i]["resto"] == nameEnd){
+                    allcom += '<p class="allCom">' +'<span>'+result[i]["pseudo"]+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
                     }
                 }
-			} else{
-				allcom = "<p>Esapce commentaire vide.</p>"
+                if (allcom == ""){
+				    allcom = "<p>Esapce commentaire vide.</p>"
+                }
 			}
             if (req.query.errorCom == 1){
                 er = "Vous devez être connecté pour poster un commentaire ! "
@@ -425,16 +428,15 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             dec = "Deconnexion";
         }
         if (req.session.username != null){
-            if (req.body.com == "" || req.body.com.length < 1 ){
+            if (req.body.com == ""){
                 res.redirect("/html/restaurants.html")
             }else{
-                db_restaurants.collection("restaurants").insertOne({"time" : req.body.time})
-                db_com.collection("commentaire").insertOne({"com": req.body.com , like:0 , pseudo : req.session.username});
+                //db_restaurants.collection("restaurants").insertOne({"time" : req.body.time})
+                db_com.collection("commentaire").insertOne({"com": req.body.com , like:0 , pseudo : req.session.username , resto : nameEnd});
                 res.redirect("/html/restaurants.html")
             }
         }else{
             res.redirect("restaurants.html?errorCom=1")
-           //res.render("html/restaurants.html", { name : nameResto , errorCom : "Vous devez être connecté pour poster un commentaire ! " , name : req.query.restaurantname, description: "desc",Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
         }
 	});
 
