@@ -107,11 +107,12 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			desc = req.body.description;
 			nameresto = req.body.nameResto;
 			imagelink = req.body.imageLink;
-
             imagelink2 = req.body.imageLink2;
-
+            imagelink3 = req.body.imageLink3;
+            imagelink4 = req.body.imageLink4;
 			address = req.body.nameAddress;
-			if (address == "" || desc == "" || nameresto == "" || imagelink == "") {
+            address_link = req.body.address_link;
+			if (address == "" || desc == "" || nameresto == "" || imagelink == ""|| address_link == ""|| imagelink2 == ""|| imagelink3 == ""|| imagelink4 == "") {
 				res.render("html/ajout_resto.html", {error:"Veuillez remplir toutes les cases"});
 			} else {
 				db_restaurants.collection("restaurants").findOne({"name": nameresto}, (err, doc) => {
@@ -120,10 +121,10 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 						db_restaurants.collection("restaurants").findOne({"address": address}, (err, doc) => {
 							if (err) throw err;
 							if (doc == null) {
-								db_restaurants.collection("restaurants").insertOne({"imagelink": imagelink, "name": nameresto, "address": address, "desc": desc , "imagelink2" : imagelink2});
+								db_restaurants.collection("restaurants").insertOne({"imagelink": imagelink, "name": nameresto, "address": address, "desc": desc, "address_link" :address_link,"imagelink2": imagelink2,"imagelink3": imagelink3,"imagelink4": imagelink4});
 								res.render("html/ajout_resto.html", {error:"Restaurant ajouté"});
 							} else {
-								res.render("html/ajout_resto.html", {error:"Cette addresse existe déjà dans la base de données"});
+								res.render("html/ajout_resto.html", {error:"Cette adresse existe déjà dans la base de données"});
 							}
 						});
 					} else {
@@ -333,7 +334,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 for (let i = 0; i < result.length; i++) {
                     tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
                     for (let x in result[i]) {
-                        if (x != "_id") {
+                        if (x != "_id"  && x != "address_link") {
 							if (count < 1) {
 								tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[i]["name"] + "' class='ImageButton'><img src='" + result[i][x] + "' class='btnImage'></td>";
 								count = 1;
@@ -484,7 +485,15 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
     //map resto 
     app.get("/html/map.html", function(req,res,next){
-        
+        db_restaurants.collection("restaurants").findOne({"name":nameEnd}, (err, result) => {
+            if (err) throw err;
+            if (result == null){
+                res.redirect("/html/index.html")
+            } else {
+                add = result["address_link"];
+            }  
+            res.render("html/map.html" , {"map": add});
+        })
     });
 
 
