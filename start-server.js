@@ -107,9 +107,12 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			desc = req.body.description;
 			nameresto = req.body.nameResto;
 			imagelink = req.body.imageLink;
+            imagelink2 = req.body.imageLink2;
+            imagelink3 = req.body.imageLink3;
+            imagelink4 = req.body.imageLink4;
 			address = req.body.nameAddress;
             address_link = req.body.address_link;
-			if (address == "" || desc == "" || nameresto == "" || imagelink == ""|| address_link == "") {
+			if (address == "" || desc == "" || nameresto == "" || imagelink == ""|| address_link == ""|| imagelink2 == ""|| imagelink3 == ""|| imagelink4 == "") {
 				res.render("html/ajout_resto.html", {error:"Veuillez remplir toutes les cases"});
 			} else {
 				db_restaurants.collection("restaurants").findOne({"name": nameresto}, (err, doc) => {
@@ -118,7 +121,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 						db_restaurants.collection("restaurants").findOne({"address": address}, (err, doc) => {
 							if (err) throw err;
 							if (doc == null) {
-								db_restaurants.collection("restaurants").insertOne({"imagelink": imagelink, "name": nameresto, "address": address, "desc": desc, "address_link" :address_link});
+								db_restaurants.collection("restaurants").insertOne({"imagelink": imagelink, "name": nameresto, "address": address, "desc": desc, "address_link" :address_link,"imagelink2": imagelink2,"imagelink3": imagelink3,"imagelink4": imagelink4});
 								res.render("html/ajout_resto.html", {error:"Restaurant ajouté"});
 							} else {
 								res.render("html/ajout_resto.html", {error:"Cette adresse existe déjà dans la base de données"});
