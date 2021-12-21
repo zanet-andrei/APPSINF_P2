@@ -4,6 +4,7 @@ body{
     background-color:whitesmoke;
     padding: 0;
     margin: 0;
+    max-width: 100%;
     font-family: Georgia, serif;
 }
 
@@ -50,6 +51,7 @@ a:hover{
 /* CORPS */
 .corps{
     display: flex;
+    margin-left: 1%;
 }
 
 .grand{
@@ -91,6 +93,8 @@ a:hover{
 /* IMAGE MILIEU*/
 .image{
     margin-top: 3%;
+    max-width: 989px;
+    max-height: 404px;
 }
 #prog{
     display: flex;
@@ -144,6 +148,11 @@ a:hover{
 
 .allCom a{
     font-size: 75%;
+}
+
+.error{
+    text-align: center;
+    color: red;
 }
 
 /*-----------------------------Barre de nav--------------------------------------------------*/

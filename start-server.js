@@ -107,6 +107,9 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 			desc = req.body.description;
 			nameresto = req.body.nameResto;
 			imagelink = req.body.imageLink;
+
+            imagelink2 = req.body.imageLink2;
+
 			address = req.body.nameAddress;
 			if (address == "" || desc == "" || nameresto == "" || imagelink == "") {
 				res.render("html/ajout_resto.html", {error:"Veuillez remplir toutes les cases"});
@@ -117,7 +120,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 						db_restaurants.collection("restaurants").findOne({"address": address}, (err, doc) => {
 							if (err) throw err;
 							if (doc == null) {
-								db_restaurants.collection("restaurants").insertOne({"imagelink": imagelink, "name": nameresto, "address": address, "desc": desc});
+								db_restaurants.collection("restaurants").insertOne({"imagelink": imagelink, "name": nameresto, "address": address, "desc": desc , "imagelink2" : imagelink2});
 								res.render("html/ajout_resto.html", {error:"Restaurant ajouté"});
 							} else {
 								res.render("html/ajout_resto.html", {error:"Cette addresse existe déjà dans la base de données"});
@@ -352,13 +355,13 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     });
 
 
-    //page resto et commentaire 
+    //Base de données
     db_com = db.db("commentaire");
 
-	// Redirection des pages et affichage du nom d'utilisateur
-
-
+    //GET de la page restaurants.html
 	app.get("/html/restaurants.html", function(req, res, next) {
+
+        //Initialisation VAR session
         if (req.session.username == null) {
             error_pseudo = "";
             admin_ = "";
@@ -371,89 +374,118 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             error_pseudo = "Bienvenue " + req.session.username;
             admin_ = "";
             dec = "Deconnexion";
-        }        
-        //info de la page
-        db_restaurants.collection("restaurants").find({}).sort({_id:-1}).toArray(function(err, result) {
-			for (let i = 0; i < result.length; i++) {
-                if (req.query.restaurantname == result[i]["name"]){
-                    nameEnd = result[i]["name"]
-                    descEnd = result[i]["desc"]
-                    //temp = result[i]["imagelink"]
+        }   
+
+        //Initialisation info restaurant
+        nameEnd = ""
+        descEnd = ""
+        if (req.query.restaurantname != null){    
+            db_restaurants.collection("restaurants").findOne({"name" : req.query.restaurantname}, (err,doc) => {
+                if (err) throw err;
+                nameEnd = doc["name"]
+                descEnd = doc["desc"]
+                //imageEnd = '<img id="prog" src="'+doc["imagelink"]+'" </img>'
+                imageEnd = ""
+                if (doc["imagelink"] != "/"){
+                    imageEnd +=  '<img id="prog" src="'+doc["imagelink"]+'"</img>'
+                }else{
+                    imageEnd +=  '<img id="prog" src="../A.png"</img>'
                 }
-            }
-        })
-
-        // image 
-
-        //imageEnd = '<img id="prog" src='+temp+">"
-
-        //commentaires
-        er =""
-		db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
-			if (err) throw err;
-			if (result[0] != null) {
+                if (doc["imagelink2"] != "/"){
+                    imageEnd +=  '<span id="prog2" type="hidden" src="'+doc["imagelink2"]+'"</span>'
+                }else{
+                    imageEnd +=  '<span id="prog2" type="hidden" src="../A.png"</span>'
+                }
+                if (doc["imagelink3"] != "/"){
+                    imageEnd +=  '<span id="prog3" type="hidden" src="'+doc["imagelink3"]+'"</span>'
+                }else{
+                    imageEnd +=  '<span id="prog3" type="hidden" src="../A.png"</span>'
+                }
+                if (doc["imagelink4"] != "/"){
+                    imageEnd +=  '<span id="prog4" type="hidden" src="'+doc["imagelink4"]+'"</span>'
+                }else{
+                    imageEnd +=  '<span id="prog4" type="hidden" src="../A.png"</span>'
+                }
+               
+                
+            })
+        }
+        
+            //commentaires affichage et retour error
+            er =""
+            db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+                if (err) throw err;
                 allcom = ""
-                for (let i = 0; i < result.length; i++) {
-                    if (result[i]["resto"] == nameEnd){
-                    allcom += '<p class="allCom">' +'<span>'+result[i]["pseudo"]+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
+                if (result[0] != null) {
+                    for (let i = 0; i < result.length; i++) {
+                        if (result[i]["resto"] == nameEnd){
+                        allcom += '<p class="allCom">' +'<span> Posté par: '+result[i]["pseudo"]+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
+                        }
+                    }
+                    if (allcom == ""){
+                        allcom = "<p>Espace commentaire vide.</p>"
                     }
                 }
-                if (allcom == ""){
-				    allcom = "<p>Esapce commentaire vide.</p>"
+                if (req.query.errorCom == 1){
+                    er = "Vous devez être connecté pour poster un commentaire ! "
+                }else if (req.query.errorCom == 2){
+                    er = "Combien de temps avez-vous attendus pour être servis ?"
+                }else if (req.query.errorCom == 3){
+                    er = "Commentaire requis"
                 }
-			}
-            if (req.query.errorCom == 1){
-                er = "Vous devez être connecté pour poster un commentaire ! "
-            }
-
-            res.render("html/restaurants.html", {errorCom :er ,name : nameEnd, test: allcom ,compte: "Se connecter" ,description: descEnd,Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
-
-		});
-	});
+                res.render("html/restaurants.html", {image: imageEnd ,errorCom :er ,name : nameEnd, test: allcom ,compte: "Se connecter" ,description: descEnd,Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
+            });
+        })
     
-	
+	//post d'un commentaire
     app.post("/html/restaurants.html", function(req, res, next) {
 		
-        if (req.session.username == null) {
-            error_pseudo = "Connexion";
-            admin_ = "";
-            dec = "";
-        }else if (req.session.username == "admin") {
-            error_pseudo = "Hello Boss";
-            admin_ = "Ajouter un restaurant";
-            dec = "Deconnexion";
-        } else {
-            error_pseudo = "Bienvenue " + req.session.username;
-            admin_ = ""
-            dec = "Deconnexion";
-        }
         if (req.session.username != null){
             if (req.body.com == ""){
-                res.redirect("/html/restaurants.html")
+                res.redirect("/html/restaurants.html?restaurantname="+nameEnd+"&errorCom=3")
             }else{
-                //db_restaurants.collection("restaurants").insertOne({"time" : req.body.time})
-                db_com.collection("commentaire").insertOne({"com": req.body.com , "like":0 , "pseudo" : req.session.username, "resto" : nameEnd, "likedBy": []});
-                res.redirect("/html/restaurants.html")
+                if (req.body.temps != -1){
+                    db_com.collection("commentaire").insertOne({"com": req.body.com , "like":0 , "pseudo" : req.session.username, "resto" : nameEnd, "likedBy": [], "time" : req.body.temps});
+                }else{
+                    res.redirect("restaurants.html?errorCom=2&restaurantname="+nameEnd)
+                }
+                res.redirect("/html/restaurants.html?restaurantname="+nameEnd)
             }
         }else{
-            res.redirect("restaurants.html?errorCom=1")
+            res.redirect("restaurants.html?errorCom=1&restaurantname="+nameEnd)
         }
 	});
 
+    //Like et dislike des commentaires
     app.get("/html/supp", function(req, res, next){
-        db_com.collection("commentaire").find({}).sort({"_id":-1}).toArray(function(err, result) {
-            if (err) throw err;
-            like = result[req.query.number]["like"] + 1
-            db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"like": like}})
-            db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"status": true}})
-            res.redirect("/html/restaurants.html")
-        });
+        if ( req.session.username != null){
+            db_com.collection("commentaire").find({}).sort({"_id":-1}).toArray(function(err, result) {
+                if (err) throw err;
+                if (result[req.query.number]["likedBy"].indexOf(req.session.username) === -1){
+                    like = result[req.query.number]["like"] + 1
+                    result[req.query.number]["likedBy"].push(req.session.username)
+                    likedby = result[req.query.number]["likedBy"]
+                    db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"like": like}})
+                    db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"likedBy": likedby}})
+                    res.redirect("/html/restaurants.html?restaurantname="+nameEnd)
+                }else{
+                    index = result[req.query.number]["likedBy"].indexOf(req.session.username)
+                    like = result[req.query.number]["like"] - 1
+                    likedby = result[req.query.number]["likedBy"].splice(index,index)
+                    db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"like": like}})
+                    db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"likedBy": likedby}})
+                    res.redirect("/html/restaurants.html?restaurantname="+nameEnd)
+                }
+            });
+        }else{
+            res.redirect("/html/restaurants.html?restaurantname="+nameEnd)
+        }
     })
 
     //map resto 
-    app.get("/html/map.html"), function(req,res,next){
-        res.render("html/map.html" , {map: "toutes la baslise iframe qui se trouve dans la bd"})
-    }
+    app.get("/html/map.html", function(req,res,next){
+        
+    });
 
 
 
