@@ -432,7 +432,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 res.redirect("/html/restaurants.html")
             }else{
                 //db_restaurants.collection("restaurants").insertOne({"time" : req.body.time})
-                db_com.collection("commentaire").insertOne({"com": req.body.com , like:0 , pseudo : req.session.username , resto : nameEnd});
+                db_com.collection("commentaire").insertOne({"com": req.body.com , "like":0 , "pseudo" : req.session.username, "resto" : nameEnd, "likedBy": []});
                 res.redirect("/html/restaurants.html")
             }
         }else{
@@ -441,13 +441,11 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 	});
 
     app.get("/html/supp", function(req, res, next){
-        if (db_account.collection("accounts"))
-        db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
-                a = 0
-                a = result[req.query.number]["like"]
-                a = a+1
-                db_com.collection("commentaire").update({"com": req.query.text}, {$set: {like: a}})
-                db_com.collection("commentaire").update({"com": req.query.text}, {$set: {status: true}})
+        db_com.collection("commentaire").find({}).sort({"_id":-1}).toArray(function(err, result) {
+            if (err) throw err;
+            like = result[req.query.number]["like"] + 1
+            db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"like": like}})
+            db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"status": true}})
             res.redirect("/html/restaurants.html")
         });
     })
