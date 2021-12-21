@@ -7,13 +7,13 @@
     
     <script>
     function monprog(element) {
-        var a = document.getElementById("prog");
-        var temp = a.getAttribute("src")
+        var a = document.getElementById("prog")
         var b = document.getElementById("prog2")
         var c = document.getElementById("prog3")
         var d = document.getElementById("prog4")
+        var temp = document.getElementById("temp")
         if (element == 1){
-            a.src = a.getAttribute("src")
+            a.src = temp.getAttribute("src")
         }else if (element == 2){
             a.src = b.getAttribute("src")
         }else if (element == 3){
@@ -21,7 +21,7 @@
         }else if (element == 4){
             a.src = d.getAttribute("src")
         }
-        }
+    }
     </script>
     
 

@@ -61,6 +61,11 @@ a:hover{
     margin-top: 3%;
 }
 
+/* nom */ 
+#nameResto{
+    display: flex;
+}
+
 /* ROND */ 
 
 .rond{
@@ -90,7 +95,7 @@ a:hover{
 /* Nom du resto */
 .grand h1{
     display: flex;
-    margin-right: 1%;
+    margin-right: 15%;
 }
 /* IMAGE MILIEU*/
 .image{
@@ -98,6 +103,12 @@ a:hover{
     max-width: 989px;
     max-height: 404px;
 }
+
+#prog, #prog2, #prog3, #prog4{
+    width: 350px;
+    height: 404px;
+}
+
 #prog{
     display: flex;
     max-block-size: 50%;

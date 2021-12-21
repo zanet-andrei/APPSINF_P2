@@ -390,23 +390,24 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 if (doc["imagelink"] != "/"){
                     imageEnd +=  '<img id="prog" src="'+doc["imagelink"]+'"</img>'
                 }else{
-                    imageEnd +=  '<img id="prog" src="../A.png"</img>'
+                    imageEnd +=  '<img id="prog" src="../no.png"</img>'
                 }
                 if (doc["imagelink2"] != "/"){
                     imageEnd +=  '<span id="prog2" type="hidden" src="'+doc["imagelink2"]+'"</span>'
                 }else{
-                    imageEnd +=  '<span id="prog2" type="hidden" src="../A.png"</span>'
+                    imageEnd +=  '<span id="prog2" type="hidden" src="../no.png"</span>'
                 }
                 if (doc["imagelink3"] != "/"){
                     imageEnd +=  '<span id="prog3" type="hidden" src="'+doc["imagelink3"]+'"</span>'
                 }else{
-                    imageEnd +=  '<span id="prog3" type="hidden" src="../A.png"</span>'
+                    imageEnd +=  '<span id="prog3" type="hidden" src="../no.png"</span>'
                 }
                 if (doc["imagelink4"] != "/"){
                     imageEnd +=  '<span id="prog4" type="hidden" src="'+doc["imagelink4"]+'"</span>'
                 }else{
-                    imageEnd +=  '<span id="prog4" type="hidden" src="../A.png"</span>'
+                    imageEnd +=  '<span id="prog4" type="hidden" src="../no.png"</span>'
                 }
+                imageEnd +=  '<span id="temp" type="hidden" src="'+doc["imagelink"]+'"</span>'
                
                 
             })
