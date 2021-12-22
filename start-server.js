@@ -9,7 +9,6 @@ let express = require('express'),
 	const { truncate } = require('fs/promises');
 	const { addAbortSignal } = require('stream');
     tf_idf = require("tf-idf-search");
-    //bcrytp = require("bcryptjs");
     crypto = require("crypto-js");
 
 var app = express();
@@ -24,9 +23,10 @@ app.use(session({
     }
 }));
 
+
+
 function verif_mdp(mot_de_passe){
 	const mdp = mot_de_passe.split("");
-    //console.log(mdp)
     const majuscules = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 	const minuscule = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 	const special = ['.',"*","[","]","(",")","$","{","}","=","!","<",">","|",":","-","_","#"];
@@ -38,16 +38,12 @@ function verif_mdp(mot_de_passe){
 	for (let index = 0; index < mdp.length; index++) {
 		if (majuscules.includes(mdp[index])){
 			bool_maj = true;
-        	//console.log("Le mdp contient une majuscule" +" "+ mdp[index]);
 		} else if ((minuscule.includes(mdp[index]))) {
 			bool_min = true;
-            //console.log("Le mdp contient une minuscule" +" "+ mdp[index]);
 		} else if ((special.includes(mdp[index]))){
 			bool_spe = true;
-            //console.log("Le mdp contient des carac spéciaux" +" "+ mdp[index]);
 		} else if (numbers.includes(mdp[index])){
 			bool_num = true;
-            //console.log("Le mdp contient des chiffres" +" "+ mdp[index]);
 		}
 	}	
     
@@ -64,30 +60,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
+    
     db_restaurants = db.db("restaurants")
 
-    db_account = db.db("accounts"); //Alex
-    //db("accounts") sous la forme {"username" : pseudo, "password" : mdp, "email" : adresse email}
-
+    db_account = db.db("accounts"); 
 
     app.get("/", function(req, res, next) {
         res.redirect("html/index.html");
     });
 
-    //Redirection page connexion compte
-    app.get("/html/test_page_co.html", function(req, res, next) {
-        req.session.destroy();
-        res.render("html/test_page_co.html");
-        //if (req.session.username == null) {
-        //    res.render("html/test_page_co.html",{Connexion : "Connexion",error :""});
-        //}else if (req.session.username == "admin") {
-        //    res.render("html/test_page_co.html",{Connexion : "Bienvenue Boss" ,error:"",Admin:"Ajouter un restaurant", Deconnexion : "Deconnexion"});
-        //}else if (req.session.username != null){
-        //    req.session.destroy();
-        //    res.render("html/test_page_co.html")
-        //}else {
-        //    res.render("html/test_page_co.html",{Connexion : "Bienvenue " + req.session.username ,error:""});
-        //}
+    app.get("/html/connexion_compte.html", function(req, res, next) {
+        if (req.session.username == null) {
+            res.render("html/connexion_compte.html", {Deconnexion: "Connexion"});
+        } else {
+            req.session.destroy();
+            res.redirect("index.html");
+        }
     });
 
     //Redirect page ajout resto admin
@@ -96,7 +84,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         if (req.session.username == "admin") {
             res.render("html/ajout_resto.html",{Connexion : "Hello Boss",error:"",Admin : "", Deconnexion : "Deconnexion"});
         } else {
-            res.render("html/test_page_co.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
+            res.render("html/connexion_compte.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
         }
     });
 
@@ -136,11 +124,11 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 	});
 
     //Redirection page création compte
-    app.get("/html/test_page_crea_compte.html", function(req, res, next) {
+    app.get("/html/creation_compte.html", function(req, res, next) {
         if (req.session.username == null) {
-            res.render("html/test_page_crea_compte.html",{Connexion : "Connexion",error :""});
+            res.render("html/creation_compte.html",{Deconnexion : "Connexion",error :""});
         }else {
-            res.render("html/test_page_crea_compte.html",{Connexion : "Bienvenue " + req.session.username ,error:"",Admin :""});
+            res.redirect("index.html")
         }
     });  
 
@@ -158,6 +146,23 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     // Barre de recherche (selon la description)
 
      app.get("/html/search", function(req, res, next) {
+        //barre nav alex
+        var error_pseudo = ""
+        var admin_ = ""
+        
+        
+        if (req.session.username == null) {
+            error_pseudo = "";
+            dec = "Connexion";
+        }else if (req.session.username == "admin") {
+            error_pseudo = "Hello Boss";
+            admin_ = "Ajouter un restaurant";
+            dec = "Deconnexion";
+        } else {
+            error_pseudo = "Bienvenue " + req.session.username;
+            dec = "Deconnexion";
+        }
+        //fin barre nav
         db_restaurants.collection("restaurants").find({}).toArray(function(err, result) {
             if (err) throw err;
             if (result[0] != null) {
@@ -174,12 +179,18 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 				var corpus = tfidf.createCorpusFromStringArray(restaurantNames);
 				
 				var searchResults = tfidf.rankDocumentsByQuery(search)
-				tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
-				count = 0;
-
-				maxResults = 3 // nombre arbitraire de resultats maximum
+				tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
 				
+                count = 0;
+
+                if (result.length > 9) { // nombre arbitraire de resultats maximum, ici 10
+                    maxResults = 10;
+                } else {
+                    maxResults = result.length;
+                }
+
 				while (maxResults > 0) {
+
 					for (let x in searchResults) {
 						maxResults -= 1
 						if (maxResults < 0) {
@@ -188,12 +199,12 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 							tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
 							index = searchResults[x]["index"]
 							for (let y in result[index]) {
-								if (y != "_id") {
+                                if (y != "_id"  && y != "address_link" && y != "imagelink2" && y != "imagelink3" && y != "imagelink4") {
 									if (count < 1) {
 										count = 1;
 										tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[index]["name"] + "' class='ImageButton'><img src='" + result[index][y] + "' class='btnImage'></td>";
 									} else {
-										tableToReturn += "<td><input type='submit' name='restaurantname' class='tablelinks' value='" + result[index][y] + "'></td>";
+										tableToReturn += "<td>" + result[index][y] + "</td>";
 									}
 									
 								}
@@ -207,7 +218,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             } else { // Si la BDD est vide
                 tableToReturn = "<p>Aucun résultat ne correspond à votre recherche</p>"
             }
-            res.render("html/index.html", {table:tableToReturn});
+            res.render("html/index.html", {table:tableToReturn, Connexion : error_pseudo , Admin : admin_, Deconnexion : dec});
         });
     });
 
@@ -216,14 +227,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     app.post("/html/create", function(req,res,next) {
         psw = req.body.password_new;
         if(req.body.username_new == "" || req.body.email_new == "" || req.body.password_new == "" || req.body.confirm_password == ""){
-            res.render("html/test_page_crea_compte.html",{error: "Veuillez remplir toutes les cases !"});
+            res.render("html/creation_compte.html",{error: "Veuillez remplir toutes les cases !"});
         } else{
             db_account.collection("accounts").findOne({"username" : req.body.username_new}, (err,doc) => {
                 if (err) throw err;
                 if (doc != null){
-                    res.render("html/test_page_crea_compte.html", {error:"Ce nom d'utilisateur est déjà pris"});
+                    res.render("html/creation_compte.html", {error:"Ce nom d'utilisateur est déjà pris"});
                 }else if (req.body.password_new.length < 8){
-                    res.render("html/test_page_crea_compte.html", {error: "Le mot de passe doit contenir minimum 8 caractères"})
+                    res.render("html/creation_compte.html", {error: "Le mot de passe doit contenir minimum 8 caractères"})
                 }else if (verif_mdp(psw) != true){
                     let result = verif_mdp(psw);
                     error = []
@@ -238,10 +249,8 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                     }
 
                     errorMessage = "Votre mot de passe doit contenir au moins "
-                    //console.log(error.length);
 
                     for (let i = 0; i < error.length; i++) {
-                        //console.log(i);    
                         if (error.length >= 1) {
                             if ((error.length-1) == i) {
                                 errorMessage += error[i];
@@ -254,16 +263,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                             errorMessage += error[i];
                         }
                     }
-                    //console.log(error);
-                    //console.log(result);
-                    res.render("html/test_page_crea_compte.html", {error: errorMessage});
+                    res.render("html/creation_compte.html", {error: errorMessage});
                 }else if (req.body.password_new != req.body.confirm_password){
-                    res.render("html/test_page_crea_compte.html", {error:"Les deux mots de passes ne correspondent pas"});
+                    res.render("html/creation_compte.html", {error:"Les deux mots de passes ne correspondent pas"});
                 }else {
                     db_account.collection("accounts").findOne({"email" : req.body.email_new}, (err,doc) => {
                         if (err) throw err;
                         if (doc != null){
-                            res.render("html/test_page_crea_compte.html", {error:"Cette adresse e-mail est déjà prise"});
+                            res.render("html/creation_compte.html", {error:"Cette adresse e-mail est déjà prise"});
                         } else {
                             //hachage du mdp
                             console.log(req.body.password_new);
@@ -285,11 +292,13 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         }
     });
 
+
     // Connexion à un compte (Alex)
+
 
     app.post("/html/connect",function(req,res,next){
         if (req.body.username == "" || req.body.password == ""){
-            res.render("html/test_page_co.html", {error: "Veuillez remplir toutes les cases!"});
+            res.render("html/connexion_compte.html", {error: "Veuillez remplir toutes les cases!"});
         } else {      
             var hashed = crypto.MD5(req.body.password);
             var hash_pwd = hashed.toString();
@@ -297,7 +306,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             db_account.collection("accounts").findOne({"username" : req.body.username,"password" : hash_pwd}, (err,doc) => {
                 if (err) throw err;
                 if (doc == null) {
-                    res.render("html/test_page_co.html", {error : "Nom d'utilisateur ou mot de passe incorect"});
+                    res.render("html/connexion_compte.html", {error : "Nom d'utilisateur ou mot de passe incorect"});
                 } else {
                     req.session.username = req.body.username;
                     res.redirect("index.html");
@@ -334,12 +343,12 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 for (let i = 0; i < result.length; i++) {
                     tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
                     for (let x in result[i]) {
-                        if (x != "_id"  && x != "address_link") {
+                        if (x != "_id"  && x != "address_link" && x != "imagelink2" && x != "imagelink3" && x != "imagelink4") {
 							if (count < 1) {
 								tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[i]["name"] + "' class='ImageButton'><img src='" + result[i][x] + "' class='btnImage'></td>";
 								count = 1;
 							} else {
-								tableToReturn += "<td><input type='submit' name='restaurantname' class='tablelinks' value='" + result[i][x] + "'></td>";
+								tableToReturn += "<td>" + result[i][x] + "</td>";
 							}
                         }
                     }
@@ -377,10 +386,11 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             dec = "Deconnexion";
         }   
 
-        //Initialisation info restaurant
         nameEnd = ""
         descEnd = ""
         imageEnd =""
+        //Initialisation info restaurant
+
         if (req.query.restaurantname != null){    
             db_restaurants.collection("restaurants").findOne({"name" : req.query.restaurantname}, (err,doc) => {
                 if (err) throw err;
@@ -487,14 +497,33 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
     //map resto 
     app.get("/html/map.html", function(req,res,next){
+        //barre nav alex
+        var error_pseudo = ""
+        var admin_ = ""
+        
+
+        
+        if (req.session.username == null) {
+            error_pseudo = "";
+            dec = "Connexion";
+        }else if (req.session.username == "admin") {
+            error_pseudo = "Hello Boss";
+            admin_ = "Ajouter un restaurant";
+            dec = "Deconnexion";
+        } else {
+            error_pseudo = "Bienvenue " + req.session.username;
+            dec = "Deconnexion";
+        }
+        //fin barre nav
         db_restaurants.collection("restaurants").findOne({"name":nameEnd}, (err, result) => {
             if (err) throw err;
             if (result == null){
                 res.redirect("/html/index.html")
             } else {
-                add = result["address_link"];
+                add = "<div style='display:flex;justify-content:center;'><p id='mapNameResto'> Carte de " + result["name"] + "</p><br>" + result["address_link"] + "</div>";
+                res.render("html/map.html" , {"map": add, Connexion : error_pseudo ,Admin : admin_, Deconnexion : dec});
             }  
-            res.render("html/map.html" , {"map": add});
+            
         })
     });
 

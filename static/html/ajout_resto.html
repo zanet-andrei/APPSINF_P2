@@ -3,23 +3,26 @@
     <head>
         <meta charset="UTF-8">
         <title>test page de co</title>
-        <link rel="stylesheet" href="../css/test_page_co-crea.css">
+        <link rel="stylesheet" href="../css/comptes.css">
     </head>
     <body>
         <header>
             <a href="index.html"><img class="logo" src="../ressources/download.png"></a>
             <nav>
                 <ul class="nav_links">
-                    <li><a id="Links" href="#">{{Admin}}</a></li>
+                    <li><a id="Links" href="../html/ajout_resto.html">{{Admin}}</a></li>
                 </ul>
             </nav>
+			<form action="/html/search" method="get">
+				<input type="text" id="searchbar" name="search" placeholder="Rechercher.. ">
+			</form>
             <a id="Links" href="Contact_admin.html"><button id="boutton_nav">Nous contacter</button></a>
             <a id="pseudo">{{Connexion}}</a>
-            <a id="pseudo" href="../html/test_page_co.html">{{Deconnexion}}</a>
+            <a id="pseudo" href="connexion_compte.html">{{Deconnexion}}</a>
         </header>
         <div id="Resto">
             <form method="post" action="/html/ajoutResto">
-                <h1>Ajouter un restaurant</h1>
+                <h1 id="titreresto">Ajouter un restaurant</h1>
                 <div class="inputs">
                     <input type="text" name="nameResto" placeholder="Nom du restaurant" >
                     <input type="text" name="nameAddress" placeholder="Adresse" >
@@ -35,7 +38,7 @@
                 <p id="error_message">{{error}}</p>
 
                 <div align="center">
-                    <button type="submit">Ajouter </button>
+                    <button id="subajoutresto" type="submit">Ajouter </button>
                 </div>
             </form>
         </div>  
