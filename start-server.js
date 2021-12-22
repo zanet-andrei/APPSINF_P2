@@ -200,7 +200,15 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 						} else {
 							tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
 							index = searchResults[x]["index"]
-                            console.log(result2)
+                            divider = 0
+                            moy = 0
+                            for (let z in result2) {
+                                if (result2[z]["resto"] == result[index]["name"]) {
+                                    moy += parseInt(result2[z]["time"])
+                                    divider += 1
+                                }
+                            }
+                            if (divider != 0) moy /= divider;
                             for (let y in result[index]) {
                                 if (y != "_id"  && y != "address_link" && y != "imagelink2" && y != "imagelink3" && y != "imagelink4") {
                                     if (count < 1) {
@@ -211,8 +219,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                                     }
                                 }
                             }
-
-                            tableToReturn += "<td>" + result2[index]["com"] + " ( " + result2[index]["like"] + " likes )" + "</td><td>" + result2[index]["time"] + " minutes</td>"
+                            tableToReturn += "<td>" + result2[index]["com"] + " ( " + result2[index]["like"] + " likes )" + "</td><td>" + result2[index]["time"] + " minutes</td><td>~ " + parseInt(moy) + " minutes" + "</td>"
                             tableToReturn += "</form></tr>"
                             count = 0;
                         };  
@@ -338,12 +345,22 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         }
         //fin barre nav
         db_restaurants.collection("restaurants").find({}).sort({_id:-1}).toArray(function(err, result) {
+            db_com.collection("commentaire").find({}).sort({like:-1}).toArray(function(err, result2) {
             if (err) throw err;
             if (result[0] != null) {
 				count = 0
-                tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
+                tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Top - Commentaire</th><th>Top - Temps d'attente</th><th>Temps d'attente moyen</th></tr>";
                 for (let i = 0; i < result.length; i++) {
                     tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
+                    divider = 0
+                    moy = 0
+                    for (let z in result2) {
+                        if (result2[z]["resto"] == result[i]["name"]) {
+                            moy += parseInt(result2[z]["time"])
+                            divider += 1
+                        }
+                    }
+                    if (divider != 0) moy /= divider;
                     for (let x in result[i]) {
                         if (x != "_id"  && x != "address_link" && x != "imagelink2" && x != "imagelink3" && x != "imagelink4") {
 							if (count < 1) {
@@ -354,6 +371,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 							}
                         }
                     }
+                    tableToReturn += "<td>" + result2[i]["com"] + " ( " + result2[i]["like"] + " likes )" + "</td><td>" + result2[i]["time"] + " minutes</td><td>~ " + parseInt(moy) + " minutes" + "</td>"
 					tableToReturn += "</form></tr>"
 					count = 0;
                 }
@@ -362,7 +380,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             }
 
             res.render("html/index.html", {table:tableToReturn, Connexion : error_pseudo ,Admin : admin_, Deconnexion : dec});
-    
+        });
         });
     });
 
