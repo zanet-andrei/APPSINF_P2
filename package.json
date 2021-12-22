@@ -1,0 +1,19 @@
+{
+  "name": "appsinf_p2",
+  "version": "1.0.0",
+  "description": "package projet 2",
+  "main": "start-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheMynx/APPSINF_P2.git"
+  },
+  "author": "Grp_C",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TheMynx/APPSINF_P2/issues"
+  },
+  "homepage": "https://github.com/TheMynx/APPSINF_P2#readme"
+}

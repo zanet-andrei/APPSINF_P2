@@ -152,6 +152,25 @@ a:hover{
 
 /* COMMENTAIRES */
 
+.colComm {
+    word-wrap: break-word;
+    max-width: 30px;
+}
+
+table {
+	border-collapse:separate;
+	border-spacing:40px;
+}
+
+th {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+th:last-child {
+	padding-right:60px;
+}
+
 .commentaires{
     display: flex;
     margin: 1%;

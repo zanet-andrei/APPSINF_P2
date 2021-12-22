@@ -68,14 +68,14 @@
                         <li><a href="html/menu.html">Menu</a></li>
                         <li><a href="/html/map.html">Map</a></li>
                         <li>
-                            <form action="rdv" method="post">
+                            <!--<form action="rdv" method="post">
                                 
                                 <select name="moment">
                                     <option value="midi">Midi</option>
                                     <option value="soir">Soir</option>
                                 </select>
                                 <input type="submit" value="reserver">
-                            </form>
+                            </form>-->
                         </li>
                     </ul>
                     <p>A propos: {{description}}</p>
@@ -107,8 +107,12 @@
                     <input class="boutons" id="PosterCom" type="submit" value="Poster">
                 </form>
                 <p class="error">{{errorCom}}</p>
-                <p class="allCom">{{{test}}} </p>
+                
             </div>
         </section>
+
+        <table id="tableComm">
+            {{{table}}}
+        </table>
         
     </body>

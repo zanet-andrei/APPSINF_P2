@@ -14,7 +14,7 @@ let express = require('express'),
 var app = express();
 
 app.use(session({
-    secret:"projet1",
+    secret:"projet2",
     resave:false,
     saveUninitialized: true,
     cookie : {
@@ -164,6 +164,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         }
         //fin barre nav
         db_restaurants.collection("restaurants").find({}).toArray(function(err, result) {
+            db_com.collection("commentaire").find({}).sort({like:-1}).toArray(function(err, result2) {
             if (err) throw err;
             if (result[0] != null) {
 				
@@ -179,7 +180,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 				var corpus = tfidf.createCorpusFromStringArray(restaurantNames);
 				
 				var searchResults = tfidf.rankDocumentsByQuery(search)
-				tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Commentaire & temps d'attente</th><th>Temps d'attente moyen</th></tr>";
+				tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Top - Commentaire</th><th>Top - Temps d'attente</th><th>Temps d'attente moyen</th></tr>";
 				
                 count = 0;
 
@@ -198,27 +199,29 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 						} else {
 							tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
 							index = searchResults[x]["index"]
-							for (let y in result[index]) {
+                            console.log(result2)
+                            for (let y in result[index]) {
                                 if (y != "_id"  && y != "address_link" && y != "imagelink2" && y != "imagelink3" && y != "imagelink4") {
-									if (count < 1) {
-										count = 1;
-										tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[index]["name"] + "' class='ImageButton'><img src='" + result[index][y] + "' class='btnImage'></td>";
-									} else {
-										tableToReturn += "<td>" + result[index][y] + "</td>";
-									}
-									
-								}
-							}
-							tableToReturn += "</form></tr>"
-							count = 0;
-						}	
-					}
-				}
-				
+                                    if (count < 1) {
+                                        count = 1;
+                                        tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[index]["name"] + "' class='ImageButton'><img src='" + result[index][y] + "' class='btnImage'></td>";
+                                    } else {
+                                        tableToReturn += "<td>" + result[index][y] + "</td>";
+                                    }
+                                }
+                            }
+
+                            tableToReturn += "<td>" + result2[index]["com"] + " ( " + result2[index]["like"] + " likes )" + "</td><td>" + result2[index]["time"] + " minutes</td>"
+                            tableToReturn += "</form></tr>"
+                            count = 0;
+                        };  
+                    }
+				}      
             } else { // Si la BDD est vide
                 tableToReturn = "<p>Aucun résultat ne correspond à votre recherche</p>"
             }
             res.render("html/index.html", {table:tableToReturn, Connexion : error_pseudo , Admin : admin_, Deconnexion : dec});
+        });
         });
     });
 
@@ -286,9 +289,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                         }
                     })                    
                 }
-
-            }
-            )
+            })
         }
     });
 
@@ -306,7 +307,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
             db_account.collection("accounts").findOne({"username" : req.body.username,"password" : hash_pwd}, (err,doc) => {
                 if (err) throw err;
                 if (doc == null) {
-                    res.render("html/connexion_compte.html", {error : "Nom d'utilisateur ou mot de passe incorect"});
+                    res.render("html/connexion_compte.html", {error : "Nom d'utilisateur ou mot de passe incorrect"});
                 } else {
                     req.session.username = req.body.username;
                     res.redirect("index.html");
@@ -426,18 +427,17 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         
             //commentaires affichage et retour error
             er =""
-            db_com.collection("commentaire").find({}).sort({_id:-1}).toArray(function(err, result) {
+            db_com.collection("commentaire").find({"resto": "Burger King"}).sort({"like": -1}).toArray(function(err, result) {
                 if (err) throw err;
-                allcom = ""
+                tableToReturn = ""
                 if (result[0] != null) {
+                    tableToReturn = "<tr><th>Posté par</th><th>Commentaire</th><th>Likes</th><th>Temps attendu</th></tr><br>"
                     for (let i = 0; i < result.length; i++) {
-                        if (result[i]["resto"] == nameEnd){
-                        allcom += '<p class="allCom">' +'<span> Posté par: '+result[i]["pseudo"]+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
-                        }
+                        tableToReturn += "<tr><td>"+ result[i]["pseudo"] + "</td><td class='colComm'>" + result[i]["com"] + "</td><td><a href='/html/supp?number=" + i + "&text=" + result[i]["com"] + "'> Like " +result[i]["like"] + "</a></td><td>"+ result[i]["time"] + " minutes</td></tr>"
+                        //allcom += '<p class="allCom">' +'<span> Posté par: '+result[i]["pseudo"]+' </span> '+ result[i]["com"] + '<a href=/html/supp?number='+i +'&text='+result[i]["com"]+'> Like '+" " +result[i]["like"] +'</a></p>'
                     }
-                    if (allcom == ""){
-                        allcom = "<p>Espace commentaire vide.</p>"
-                    }
+                } else{
+                        tableToReturn = "<p>Espace commentaire vide.</p>"
                 }
                 if (req.query.errorCom == 1){
                     er = "Vous devez être connecté pour poster un commentaire ! "
@@ -446,7 +446,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 }else if (req.query.errorCom == 3){
                     er = "Commentaire requis"
                 }
-                res.render("html/restaurants.html", {image: imageEnd ,errorCom :er ,name : nameEnd, test: allcom ,compte: "Se connecter" ,description: descEnd,Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
+                res.render("html/restaurants.html", {image: imageEnd ,errorCom :er ,name : nameEnd, table: tableToReturn ,compte: "Se connecter" ,description: descEnd,Connexion : error_pseudo, Admin : admin_, Deconnexion : dec})
             });
         })
     
@@ -472,9 +472,15 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     //Like et dislike des commentaires
     app.get("/html/supp", function(req, res, next){
         if ( req.session.username != null){
-            db_com.collection("commentaire").find({}).sort({"_id":-1}).toArray(function(err, result) {
+            db_com.collection("commentaire").find({resto: nameEnd}).toArray(function(err, result) {
                 if (err) throw err;
-                if (result[req.query.number]["likedBy"].indexOf(req.session.username) === -1){
+                index = result[req.query.number]["likedBy"].indexOf(req.session.username)
+                console.log(index)
+                console.log(result)
+                console.log(req.query.number)
+                console.log(result[req.query.number]["likedBy"])
+                if (index === -1){
+                    console.log("if")
                     like = result[req.query.number]["like"] + 1
                     result[req.query.number]["likedBy"].push(req.session.username)
                     likedby = result[req.query.number]["likedBy"]
@@ -482,9 +488,10 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                     db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"likedBy": likedby}})
                     res.redirect("/html/restaurants.html?restaurantname="+nameEnd)
                 }else{
-                    index = result[req.query.number]["likedBy"].indexOf(req.session.username)
+                    console.log("else")
                     like = result[req.query.number]["like"] - 1
-                    likedby = result[req.query.number]["likedBy"].splice(index,index)
+                    result[req.query.number]["likedBy"].pop(req.session.username);
+                    likedby = result[req.query.number]["likedBy"]
                     db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"like": like}})
                     db_com.collection("commentaire").update({"com": req.query.text}, {$set: {"likedBy": likedby}})
                     res.redirect("/html/restaurants.html?restaurantname="+nameEnd)
