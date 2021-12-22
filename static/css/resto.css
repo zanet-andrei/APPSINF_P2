@@ -136,6 +136,7 @@ a:hover{
 .desc{
     display: flex;
     flex-direction: column;
+    
     margin-left: 15%;
     
 }
@@ -149,6 +150,12 @@ a:hover{
 .list_resto li{
     list-style-type:none;
 }
+
+#descText{
+    display: flex;
+    min-width: 300%;
+}
+
 
 /* COMMENTAIRES */
 
