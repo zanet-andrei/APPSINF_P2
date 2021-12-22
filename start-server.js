@@ -11,7 +11,6 @@ const { truncate } = require('fs/promises');
 const { addAbortSignal } = require('stream');
 tf_idf = require("tf-idf-search");
 crypto = require("crypto-js");
-multer = require("multer");
 
 var app = express();
 
@@ -61,91 +60,84 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
-
+    // Démarrer les collections
     db_restaurants = db.db("restaurants")
-
+    db_com = db.db("commentaire");
     db_account = db.db("accounts");
 
+    // Redirection racine -> index.html
     app.get("/", function (req, res, next) {
         res.redirect("html/index.html");
     });
 
-    app.get("/html/connexion_compte.html", function (req, res, next) {
+    // GET Page d'accueil - remplissage tableau restaurants
+    app.get("/html/index.html", function (req, res, next) {
+        //barre nav alex
+        var error_pseudo = ""
+        var admin_ = ""
+
+
         if (req.session.username == null) {
-            res.render("html/connexion_compte.html", { Deconnexion: "Connexion" });
-        } else {
-            req.session.destroy();
-            res.redirect("index.html");
-        }
-    });
-
-    //Redirect page ajout resto admin
-
-    app.get("/html/ajout_resto.html", function (req, res, next) {
-        if (req.session.username == "admin") {
-            res.render("html/ajout_resto.html", { Connexion: "Hello Boss", error: "", Admin: "Ajouter un restaurant", Deconnexion: "Deconnexion" });
-        } else {
-            res.render("html/connexion_compte.html", { Connexion: "Connexion", error: "Vous n'êtes pas administrateur", Admin: "" });
-        }
-    });
-
-    //ajout des elements a la db 
-
-    app.post("/html/ajoutResto", function (req, res, next) {
-        if (req.session.username == "admin") {
-            desc = req.body.description;
-            nameresto = req.body.nameResto;
-            imagelink = req.body.imageLink;
-            imagelink2 = req.body.imageLink2;
-            imagelink3 = req.body.imageLink3;
-            imagelink4 = req.body.imageLink4;
-            address = req.body.nameAddress;
-            address_link = req.body.address_link;
-            if (address == "" || desc == "" || nameresto == "" || imagelink == "" || address_link == "" || imagelink2 == "" || imagelink3 == "" || imagelink4 == "") {
-                res.render("html/ajout_resto.html", { error: "Veuillez remplir toutes les cases" });
-            } else {
-                db_restaurants.collection("restaurants").findOne({ "name": nameresto }, (err, doc) => {
-                    if (err) throw err;
-                    if (doc == null) {
-                        db_restaurants.collection("restaurants").findOne({ "address": address }, (err, doc) => {
-                            if (err) throw err;
-                            if (doc == null) {
-                                db_restaurants.collection("restaurants").insertOne({ "imagelink": imagelink, "name": nameresto, "address": address, "desc": desc, "address_link": address_link, "imagelink2": imagelink2, "imagelink3": imagelink3, "imagelink4": imagelink4 });
-                                res.render("html/ajout_resto.html", { error: "Restaurant ajouté" });
-                            } else {
-                                res.render("html/ajout_resto.html", { error: "Cette adresse existe déjà dans la base de données" });
-                            }
-                        });
-                    } else {
-                        res.render("html/ajout_resto.html", { error: "Un restaurant existe déjà avec ce nom dans la base de données" });
-                    }
-                });
-            }
-        }
-    });
-
-    //Redirection page création compte
-    app.get("/html/creation_compte.html", function (req, res, next) {
-        if (req.session.username == null) {
-            res.render("html/creation_compte.html", { Deconnexion: "Connexion", error: "" });
-        } else {
-            res.redirect("index.html")
-        }
-    });
-
-    //Redirection contact admin
-    app.get("/html/Contact_admin.html", function (req, res, next) {
-        if (req.session.username == null) {
-            res.render("html/Contact_admin.html", { Connexion: "", error: "", Deconnexion: "Connexion" });
+            error_pseudo = "";
+            dec = "Connexion";
         } else if (req.session.username == "admin") {
-            res.render("html/Contact_admin.html", { Connexion: "Hello Boss", error: "", Admin: "Ajouter un restaurant", Deconnexion: "Deconnexion" });
+            error_pseudo = "Hello Boss";
+            admin_ = "Ajouter un restaurant";
+            dec = "Deconnexion";
         } else {
-            res.render("html/Contact_admin.html", { Connexion: "Bienvenue " + req.session.username, error: "", Deconnexion: "Deconnexion" });
+            error_pseudo = "Bienvenue " + req.session.username;
+            dec = "Deconnexion";
         }
+        //fin barre nav
+        db_restaurants.collection("restaurants").find({}).sort({ _id: -1 }).toArray(function (err, result) {
+            db_com.collection("commentaire").find({}).sort({ like: -1 }).toArray(function (err, result2) {
+                if (err) throw err;
+                if (result[0] != null) {
+                    count = 0
+                    tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Top - Commentaire</th><th>Top - Temps d'attente</th><th>Temps d'attente moyen</th></tr>";
+                    for (let i = 0; i < result.length; i++) {
+                        tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
+                        divider = 0
+                        moy = 0
+                        line = null
+                        for (let y in result2) {
+                            if (result2[y]["resto"] == result[i]["name"]) {
+                                moy += parseInt(result2[y]["time"])
+                                divider += 1
+                                if (line == null) {
+                                    line = result2[y]
+                                }
+                            }
+                        }
+                        if (divider != 0) moy /= divider;
+                        for (let x in result[i]) {
+                            if (x != "_id" && x != "address_link" && x != "imagelink2" && x != "imagelink3" && x != "imagelink4") {
+                                if (count < 1) {
+                                    tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[i]["name"] + "' class='ImageButton'><img src='" + result[i][x] + "' class='btnImage'></td>";
+                                    count = 1;
+                                } else {
+                                    tableToReturn += "<td>" + result[i][x] + "</td>";
+                                }
+                            }
+                        }
+                        if (line == null) {
+                            tableToReturn += "<td>Aucun commentaire</td><td>Aucun temps</td><td>Inconnu</td>"
+                        } else {
+                            tableToReturn += "<td>" + line["com"] + " ( " + line["like"] + " likes )" + "</td><td>" + line["time"] + " minutes</td><td>~ " + parseInt(moy) + " minutes" + "</td>"
+                            tableToReturn += "</form></tr>"
+                        }
+                        count = 0;
+                    }
+                } else {
+                    tableToReturn = "<p>Aucun élément ne correspond à votre recherche.</p>"
+                }
+
+                res.render("html/index.html", { table: tableToReturn, Connexion: error_pseudo, Admin: admin_, Deconnexion: dec });
+            });
+        });
     });
 
-    // Barre de recherche (selon la description)
-
+    // Fonction de recherche (selon description)
     app.get("/html/search", function (req, res, next) {
         //barre nav alex
         var error_pseudo = ""
@@ -175,9 +167,9 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
                     tfidf = new tf_idf()
 
-                    for (let i = 0; i < result.length; i++) {
-                        restaurantNames.push(result[i]["name"]);
-                    }
+                    //for (let i = 0; i < result.length; i++) {
+                    //    restaurantNames.push(result[i]["name"]);
+                    //}
                     for (let i = 0; i < result.length; i++) {
                         restaurantDesc.push(result[i]["desc"]);
                     }
@@ -200,8 +192,9 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                         for (let x in searchResults) {
                             maxResults -= 1
                             if (maxResults < 0) {
-                                break;
+                                break; // éviter de répéter les mêmes lignes dans le cas où il y a moins de 10 restaurants dans la BDD
                             } else {
+                                // Création du tableau des restaurants
                                 tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
                                 index = searchResults[x]["index"]
                                 divider = 0
@@ -212,7 +205,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                                         divider += 1
                                     }
                                 }
-                                if (divider != 0) moy /= divider;
+                                if (divider != 0) moy /= divider; 
                                 for (let y in result[index]) {
                                     if (y != "_id" && y != "address_link" && y != "imagelink2" && y != "imagelink3" && y != "imagelink4") {
                                         if (count < 1) {
@@ -247,6 +240,26 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                 res.render("html/index.html", { table: tableToReturn, Connexion: error_pseudo, Admin: admin_, Deconnexion: dec });
             });
         });
+    });
+
+    // Connexion/déconnexion
+    app.get("/html/connexion_compte.html", function (req, res, next) {
+        if (req.session.username == null) {
+            res.render("html/connexion_compte.html", { Deconnexion: "Connexion" });
+        } else {
+            
+            res.redirect("index.html");
+        }
+    });
+
+    //Redirection page création compte
+    app.get("/html/creation_compte.html", function (req, res, next) {
+        if (req.session.username == null) {
+            res.render("html/creation_compte.html", { Deconnexion: "Connexion", error: "" });
+        } else {
+            req.session.destroy();
+            res.redirect("index.html")
+        }
     });
 
     //création de compte (Alex)
@@ -341,75 +354,63 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
     }
     );
 
-    app.get("/html/index.html", function (req, res, next) {
-        //barre nav alex
-        var error_pseudo = ""
-        var admin_ = ""
+    //Redirect page ajout resto admin
 
-
-        if (req.session.username == null) {
-            error_pseudo = "";
-            dec = "Connexion";
-        } else if (req.session.username == "admin") {
-            error_pseudo = "Hello Boss";
-            admin_ = "Ajouter un restaurant";
-            dec = "Deconnexion";
+    app.get("/html/ajout_resto.html", function (req, res, next) {
+        if (req.session.username == "admin") {
+            res.render("html/ajout_resto.html", { Connexion: "Hello Boss", error: "", Admin: "Ajouter un restaurant", Deconnexion: "Deconnexion" });
         } else {
-            error_pseudo = "Bienvenue " + req.session.username;
-            dec = "Deconnexion";
+            res.render("html/connexion_compte.html", { Connexion: "Connexion", error: "Vous n'êtes pas administrateur", Admin: "" });
         }
-        //fin barre nav
-        db_restaurants.collection("restaurants").find({}).sort({ _id: -1 }).toArray(function (err, result) {
-            db_com.collection("commentaire").find({}).sort({ like: -1 }).toArray(function (err, result2) {
-                if (err) throw err;
-                if (result[0] != null) {
-                    count = 0
-                    tableToReturn = "<tr><th>Restaurant</th><th>Nom</th><th>Adresse</th><th>Description</th><th>Top - Commentaire</th><th>Top - Temps d'attente</th><th>Temps d'attente moyen</th></tr>";
-                    for (let i = 0; i < result.length; i++) {
-                        tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
-                        divider = 0
-                        moy = 0
-                        line = null
-                        for (let y in result2) {
-                            if (result2[y]["resto"] == result[i]["name"]) {
-                                moy += parseInt(result2[y]["time"])
-                                divider += 1
-                                if (line == null) {
-                                    line = result2[y]
-                                }
-                            }
-                        }
-                        if (divider != 0) moy /= divider;
-                        for (let x in result[i]) {
-                            if (x != "_id" && x != "address_link" && x != "imagelink2" && x != "imagelink3" && x != "imagelink4") {
-                                if (count < 1) {
-                                    tableToReturn += "<td><button type='submit' name='restaurantname' value='" + result[i]["name"] + "' class='ImageButton'><img src='" + result[i][x] + "' class='btnImage'></td>";
-                                    count = 1;
-                                } else {
-                                    tableToReturn += "<td>" + result[i][x] + "</td>";
-                                }
-                            }
-                        }
-                        if (line == null) {
-                            tableToReturn += "<td>Aucun commentaire</td><td>Aucun temps</td><td>Inconnu</td>"
-                        } else {
-                            tableToReturn += "<td>" + line["com"] + " ( " + line["like"] + " likes )" + "</td><td>" + line["time"] + " minutes</td><td>~ " + parseInt(moy) + " minutes" + "</td>"
-                            tableToReturn += "</form></tr>"
-                        }
-                        count = 0;
-                    }
-                } else {
-                    tableToReturn = "<p>Aucun élément ne correspond à votre recherche.</p>"
-                }
+    });
 
-                res.render("html/index.html", { table: tableToReturn, Connexion: error_pseudo, Admin: admin_, Deconnexion: dec });
-            });
-        });
+    //ajout des elements a la db 
+
+    app.post("/html/ajoutResto", function (req, res, next) {
+        if (req.session.username == "admin") {
+            desc = req.body.description;
+            nameresto = req.body.nameResto;
+            imagelink = req.body.imageLink;
+            imagelink2 = req.body.imageLink2;
+            imagelink3 = req.body.imageLink3;
+            imagelink4 = req.body.imageLink4;
+            address = req.body.nameAddress;
+            address_link = req.body.address_link;
+            if (address == "" || desc == "" || nameresto == "" || imagelink == "" || address_link == "" || imagelink2 == "" || imagelink3 == "" || imagelink4 == "") {
+                res.render("html/ajout_resto.html", { error: "Veuillez remplir toutes les cases" });
+            } else {
+                db_restaurants.collection("restaurants").findOne({ "name": nameresto }, (err, doc) => {
+                    if (err) throw err;
+                    if (doc == null) {
+                        db_restaurants.collection("restaurants").findOne({ "address": address }, (err, doc) => {
+                            if (err) throw err;
+                            if (doc == null) {
+                                db_restaurants.collection("restaurants").insertOne({ "imagelink": imagelink, "name": nameresto, "address": address, "desc": desc, "address_link": address_link, "imagelink2": imagelink2, "imagelink3": imagelink3, "imagelink4": imagelink4 });
+                                res.render("html/ajout_resto.html", { error: "Restaurant ajouté" });
+                            } else {
+                                res.render("html/ajout_resto.html", { error: "Cette adresse existe déjà dans la base de données" });
+                            }
+                        });
+                    } else {
+                        res.render("html/ajout_resto.html", { error: "Un restaurant existe déjà avec ce nom dans la base de données" });
+                    }
+                });
+            }
+        }
     });
 
 
-    //Base de données
-    db_com = db.db("commentaire");
+    //Redirection contact admin
+    app.get("/html/Contact_admin.html", function (req, res, next) {
+        if (req.session.username == null) {
+            res.render("html/Contact_admin.html", { Connexion: "", error: "", Deconnexion: "Connexion" });
+        } else if (req.session.username == "admin") {
+            res.render("html/Contact_admin.html", { Connexion: "Hello Boss", error: "", Admin: "Ajouter un restaurant", Deconnexion: "Deconnexion" });
+        } else {
+            res.render("html/Contact_admin.html", { Connexion: "Bienvenue " + req.session.username, error: "", Deconnexion: "Deconnexion" });
+        }
+    });
+
 
     //GET de la page restaurants.html
     app.get("/html/restaurants.html", function (req, res, next) {
