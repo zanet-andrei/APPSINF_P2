@@ -1,3 +1,4 @@
+const { delay } = require('bluebird');
 let express = require('express'),
     consolidate = require('consolidate'),
     MongoClient = require('mongodb').MongoClient,
@@ -427,7 +428,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
         
             //commentaires affichage et retour error
             er =""
-            db_com.collection("commentaire").find({"resto": "Burger King"}).sort({"like": -1}).toArray(function(err, result) {
+            db_com.collection("commentaire").find({resto: req.query.restaurantname}).sort({"like": -1}).toArray(function(err, result) {
                 if (err) throw err;
                 tableToReturn = ""
                 if (result[0] != null) {
