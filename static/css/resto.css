@@ -70,6 +70,7 @@ a:hover{
 
 .rond{
     margin-top: 3%;
+    margin-left: 15%;
 }
 .list_rond{    
     display: flex;         /* --> list des 4 ronds */
@@ -127,7 +128,7 @@ a:hover{
 .desc{
     display: flex;
     flex-direction: column;
-    margin-left: 5%;
+    margin-left: 15%;
     
 }
 
