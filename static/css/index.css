@@ -85,8 +85,8 @@ tr {
 	height:auto;
 }
 
-#logoSite {
-	max-width:200px;
+.logo {
+	width:125px;
 	height:auto;
 }
 

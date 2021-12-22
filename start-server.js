@@ -83,7 +83,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 
     app.get("/html/ajout_resto.html", function(req, res, next) {
         if (req.session.username == "admin") {
-            res.render("html/ajout_resto.html",{Connexion : "Hello Boss",error:"",Admin : "", Deconnexion : "Deconnexion"});
+            res.render("html/ajout_resto.html",{Connexion : "Hello Boss",error:"",Admin : "Ajouter un restaurant", Deconnexion : "Deconnexion"});
         } else {
             res.render("html/connexion_compte.html",{Connexion : "Connexion", error:"Vous n'êtes pas administrateur",Admin:""});
         }
@@ -202,9 +202,9 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 							index = searchResults[x]["index"]
                             divider = 0
                             moy = 0
-                            for (let z in result2) {
-                                if (result2[z]["resto"] == result[index]["name"]) {
-                                    moy += parseInt(result2[z]["time"])
+                            for (let y in result2) {
+                                if (result2[y]["resto"] == result[index]["name"]) {
+                                    moy += parseInt(result2[y]["time"])
                                     divider += 1
                                 }
                             }
@@ -354,10 +354,14 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
                     tableToReturn += "<tr><form action='/html/restaurants.html' method='get'>";
                     divider = 0
                     moy = 0
-                    for (let z in result2) {
-                        if (result2[z]["resto"] == result[i]["name"]) {
-                            moy += parseInt(result2[z]["time"])
+                    line = null
+                    for (let y in result2) {
+                        if (result2[y]["resto"] == result[i]["name"]) {
+                            moy += parseInt(result2[y]["time"])
                             divider += 1
+                            if (line == null) {
+                                line = result2[y]
+                            }
                         }
                     }
                     if (divider != 0) moy /= divider;
@@ -371,7 +375,7 @@ MongoClient.connect("mongodb://localhost:27017", (err, db) => {
 							}
                         }
                     }
-                    tableToReturn += "<td>" + result2[i]["com"] + " ( " + result2[i]["like"] + " likes )" + "</td><td>" + result2[i]["time"] + " minutes</td><td>~ " + parseInt(moy) + " minutes" + "</td>"
+                    tableToReturn += "<td>" + line["com"] + " ( " + line["like"] + " likes )" + "</td><td>" + line["time"] + " minutes</td><td>~ " + parseInt(moy) + " minutes" + "</td>"
 					tableToReturn += "</form></tr>"
 					count = 0;
                 }

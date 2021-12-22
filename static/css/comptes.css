@@ -13,7 +13,10 @@ body {
 }
 
 /*-------------------------------Barre de nav (Alex)------------------------------*/
-
+.logo {
+	width:125px;
+	height:auto;
+}
 #searchbar {
 	padding:5px;
 }
