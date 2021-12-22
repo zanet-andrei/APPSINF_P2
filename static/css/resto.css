@@ -1,13 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
+* {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+}
 
 body{
     background-color:whitesmoke;
-    padding: 0;
-    margin: 0;
+    margin:0;
+    padding:0;
     /*font-family: Georgia, serif;*/
-    font-family: "Montserrat", sans-serif;
-    font-weight: 500;
+}
+
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
+
 }
 
 /* ENTETE */
@@ -168,7 +176,17 @@ a:hover{
     color: red;
 }
 
-/*-----------------------------Barre de nav--------------------------------------------------*/
+/*-------------------------------Barre de nav (Alex)------------------------------*/
+
+header, header *, header * * {
+    margin:0;
+    padding:0;
+}
+
+#searchbar {
+	padding:5px;
+}
+
 header{
     box-sizing: border-box;
     margin: 0;
@@ -230,3 +248,31 @@ header{
 #pseudo:hover,#Connexion:hover{
     color: rgba(0, 136, 169, 0.5); 
 }
+
+.contact{
+    display: flex;
+    justify-content: space-around;
+    margin: 50px 20px;
+}
+
+.each{
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: white;
+}
+
+#contact_admin {
+    display: flex;
+    background-color: rgba(0, 136, 169, 1);
+    justify-content: center;
+}
+
+.Contact_mail {
+    margin-top: 10px; 
+    background-color:#fff;
+    padding: 40px   60px;
+    border-radius: 20px;
+    min-width: 300px;
+    margin-top: 100px;
+ }
